@@ -62,7 +62,7 @@
 		}
 	}
 	
-	$s = new Smooth(array(100, 1, 5, 3), array(1, 50, 7)); echo $s->smooth();
+	$s = new Smooth(array(100, 1, 5, 3), array(1, 50, 7)); echo $s->smooth(); 
 	/*
 	$handle = fopen("2010_1A_2.txt", "r");
 	if ($handle) {

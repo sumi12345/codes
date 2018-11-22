@@ -16,7 +16,7 @@ class Pancakes {
         return $min_time;
     }
 
-    // ·ÖÅäµ½Ã¿¸öÅÌ×ÓÓĞi¸öÔÂ±ıÒÔÏÂĞèÒª¶àÉÙ·ÖÖÓ
+    // åˆ†é…åˆ°æ¯ä¸ªç›˜å­æœ‰iä¸ªæœˆé¥¼ä»¥ä¸‹éœ€è¦å¤šå°‘åˆ†é’Ÿ
     private function per_plate($i) {
         $need_time = $i;
         foreach($this->P as $num) {

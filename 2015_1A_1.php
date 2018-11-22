@@ -4,12 +4,12 @@ ini_set("memory_limit","3M");
 
 class Mushroom {
 
-	public function solve($N, $M) {
-		$instant = $this->instant($N, $M);
+    public function solve($N, $M) {
+        $instant = $this->instant($N, $M);
         $constant = $this->constant($N, $M);
 
-		return $instant.' '.$constant;
-	}
+        return $instant.' '.$constant;
+    }
 
     private function instant($N, $M) {
         $num = 0;
@@ -36,32 +36,32 @@ class Mushroom {
 }
 
 class Input {
-	private $in_file;
-	private $out_file;
+    private $in_file;
+    private $out_file;
 
-	function __construct($i, $o) {
-		$this->in_file = $i;
-		$this->out_file = $o;
-	}
+    function __construct($i, $o) {
+        $this->in_file = $i;
+        $this->out_file = $o;
+    }
 
-	function process() {
-		$handle = fopen($this->in_file, "r");
-		if ($handle) {
-			$cases = intval(fgets($handle, 32));
-			file_put_contents($this->out_file, '');
-			$M = new Mushroom();
-			for($c = 1; $c <= $cases; $c ++) {
-				echo 'Case #'.$c.': ';
-				file_put_contents($this->out_file, 'Case #'.$c.': ', FILE_APPEND);
+    function process() {
+        $handle = fopen($this->in_file, "r");
+        if ($handle) {
+            $cases = intval(fgets($handle, 32));
+            file_put_contents($this->out_file, '');
+            $M = new Mushroom();
+            for($c = 1; $c <= $cases; $c ++) {
+                echo 'Case #'.$c.': ';
+                file_put_contents($this->out_file, 'Case #'.$c.': ', FILE_APPEND);
                 $n = intval(trim(fgets($handle)));
-				$m = explode(' ', trim(fgets($handle)));
-				$r = $M->solve($n, $m);
-				echo ($r)."\n";
-				file_put_contents($this->out_file, ($r).($c == $cases ? "" : "\r\n"), FILE_APPEND);
-			}
-			fclose($handle);
-		}
-	}
+                $m = explode(' ', trim(fgets($handle)));
+                $r = $M->solve($n, $m);
+                echo ($r)."\n";
+                file_put_contents($this->out_file, ($r).($c == $cases ? "" : "\r\n"), FILE_APPEND);
+            }
+            fclose($handle);
+        }
+    }
 }
 
 $t = time();
@@ -73,5 +73,3 @@ $i->process();
 
 echo "\n".'execution time: '.(time() - $t);
 echo "\n".'memory peak usage: '.(memory_get_peak_usage() / 1024 / 1024);
-
-?>

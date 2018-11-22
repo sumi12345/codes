@@ -4,7 +4,7 @@ ini_set("memory_limit","3M");
 
 class Barbershop {
 
-	public function solve($B, $N, $M) {
+    public function solve($B, $N, $M) {
         $T = array();
         foreach ($M as $k => $v) $T[$k + 1] = $v;
 
@@ -30,7 +30,7 @@ class Barbershop {
             if ($min % $T[$i] == 0) $to_be_served --;
             if ($to_be_served == 0) return $i;
         }
-	}
+    }
 
     private function served_customers_at($t) {
         $num = 0;
@@ -40,34 +40,34 @@ class Barbershop {
 }
 
 class Input {
-	private $in_file;
-	private $out_file;
+    private $in_file;
+    private $out_file;
 
-	function __construct($i, $o) {
-		$this->in_file = $i;
-		$this->out_file = $o;
-	}
+    function __construct($i, $o) {
+        $this->in_file = $i;
+        $this->out_file = $o;
+    }
 
-	function process() {
-		$handle = fopen($this->in_file, "r");
-		if ($handle) {
-			$cases = intval(fgets($handle, 32));
-			file_put_contents($this->out_file, '');
-			$B = new Barbershop();
-			for($c = 1; $c <= $cases; $c ++) {
-				echo 'Case #'.$c.': ';
-				file_put_contents($this->out_file, 'Case #'.$c.': ', FILE_APPEND);
+    function process() {
+        $handle = fopen($this->in_file, "r");
+        if ($handle) {
+            $cases = intval(fgets($handle, 32));
+            file_put_contents($this->out_file, '');
+            $B = new Barbershop();
+            for($c = 1; $c <= $cases; $c ++) {
+                echo 'Case #'.$c.': ';
+                file_put_contents($this->out_file, 'Case #'.$c.': ', FILE_APPEND);
                 $conf = explode(' ', trim(fgets($handle)));
                 $b = $conf[0];
                 $n = $conf[1];
-				$m = explode(' ', trim(fgets($handle)));
-				$r = $B->solve($b, $n, $m);
-				echo ($r)."\n";
-				file_put_contents($this->out_file, ($r).($c == $cases ? "" : "\r\n"), FILE_APPEND);
-			}
-			fclose($handle);
-		}
-	}
+                $m = explode(' ', trim(fgets($handle)));
+                $r = $B->solve($b, $n, $m);
+                echo ($r)."\n";
+                file_put_contents($this->out_file, ($r).($c == $cases ? "" : "\r\n"), FILE_APPEND);
+            }
+            fclose($handle);
+        }
+    }
 }
 
 $t = time();
@@ -79,5 +79,3 @@ $i->process();
 
 echo "\n".'execution time: '.(time() - $t);
 echo "\n".'memory peak usage: '.(memory_get_peak_usage() / 1024 / 1024);
-
-?>

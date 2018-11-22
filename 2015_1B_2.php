@@ -4,7 +4,7 @@ ini_set("memory_limit","3M");
 
 class Neighbors {
 
-	public function solve($R, $C, $N) {
+    public function solve($R, $C, $N) {
         // 一定可以为0
         if ($N <= ceil($R * $C / 2)) return 0;
 
@@ -39,7 +39,7 @@ class Neighbors {
 
         $S = max($S1, $S2);
         return $unhappiness - $S;
-	}
+    }
 
     // 行或列是偶数的情况
     private function score_even($K, $R, $C) {
@@ -58,31 +58,31 @@ class Neighbors {
 }
 
 class Input {
-	private $in_file;
-	private $out_file;
+    private $in_file;
+    private $out_file;
 
-	function __construct($i, $o) {
-		$this->in_file = $i;
-		$this->out_file = $o;
-	}
+    function __construct($i, $o) {
+        $this->in_file = $i;
+        $this->out_file = $o;
+    }
 
-	function process() {
-		$handle = fopen($this->in_file, "r");
-		if ($handle) {
-			$cases = intval(fgets($handle, 32));
-			file_put_contents($this->out_file, '');
-			$N = new Neighbors();
-			for($c = 1; $c <= $cases; $c ++) {
-				echo 'Case #'.$c.': ';
-				file_put_contents($this->out_file, 'Case #'.$c.': ', FILE_APPEND);
+    function process() {
+        $handle = fopen($this->in_file, "r");
+        if ($handle) {
+            $cases = intval(fgets($handle, 32));
+            file_put_contents($this->out_file, '');
+            $N = new Neighbors();
+            for($c = 1; $c <= $cases; $c ++) {
+                echo 'Case #'.$c.': ';
+                file_put_contents($this->out_file, 'Case #'.$c.': ', FILE_APPEND);
                 $conf = explode(' ', trim(fgets($handle)));
-				$r = $N->solve($conf[0], $conf[1], $conf[2]);
-				echo ($r)."\n";
-				file_put_contents($this->out_file, ($r).($c == $cases ? "" : "\r\n"), FILE_APPEND);
-			}
-			fclose($handle);
-		}
-	}
+                $r = $N->solve($conf[0], $conf[1], $conf[2]);
+                echo ($r)."\n";
+                file_put_contents($this->out_file, ($r).($c == $cases ? "" : "\r\n"), FILE_APPEND);
+            }
+            fclose($handle);
+        }
+    }
 }
 
 $t = time();
@@ -94,5 +94,3 @@ $i->process();
 
 echo "\n".'execution time: '.(time() - $t);
 echo "\n".'memory peak usage: '.(memory_get_peak_usage() / 1024 / 1024);
-
-?>

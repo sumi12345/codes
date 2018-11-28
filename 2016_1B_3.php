@@ -30,17 +30,18 @@ class Technobabble {
                     $parent[$v] = $u;
                     $queue[] = $v;
                     $visited[$v] = 1;
+                    if ($v == 't') break 2;
                 }
             }
 
             if (empty($visited['t'])) break;               // 从s找不到路径到达t, 已经是最大流量
 
             // echo "\n".'road found: ';
-            for ($u = 't'; $u != 's'; $u = $parent[$u]) {  // 更新路径上的流量
-                // echo $u.' ';
-                $v = $parent[$u];
-                $F[$v][$u] += 1;
-                $F[$u][$v] -= 1;
+            for ($v = 't'; $v != 's'; $v = $parent[$v]) {  // 更新路径上的流量
+                // echo $v.' <- ';
+                $u = $parent[$v];
+                $F[$u][$v] += 1;
+                $F[$v][$u] -= 1;
             }
 
             $f ++;

@@ -21,6 +21,7 @@ class FashionPolice {
 }
 
 $F = new FashionPolice();
+echo $F->solve(1, 2, 3, 2);
 echo $F->solve(2, 2, 2, 1);
 exit;
 

@@ -65,3 +65,25 @@ $i->process();
 
 echo '<br/>execution time: '.(time() - $t).'<br/>';
 echo '<br/>memory peak usage: '.(memory_get_peak_usage() / 1024 / 1024);
+/**
+ * 在一家无限馅饼屋, 馅饼是有限的, 顾客是无限的!
+ * 在开店的时候, 有 D 个人盘子里有馅饼, 第 i 个人盘子里有 Pi 个馅饼.
+ * 1 个顾客 1 分钟吃掉 1 个馅饼
+ * 你可以选择几个特别分钟, 这分钟没人吃饭, 你可以把 1 个馅饼从一个顾客的盘子挪到另一个顾客盘子
+ * 求如何指定特别分钟, 能让顾客最快吃完所有馅饼
+ *
+ * 思路: 1. 因为永远有空盘子, 所以每次一定是把饼分给空盘子的人
+ *       2. 挪一次吃一次, 不如全部分完, 大家一起吃, 吃的效率更高
+ *          所以, 看把饼分到每个人盘子里都有 i 个以下需要多少时间, 再加上 i 分钟吃饼
+ *
+ * 对于现有算法: 你看, ceil(a/1), ceil(a/2)... 的值最多改变 2 * sqrt(a) 次,
+ * 因为从 1 到 sqrt(a), 最多可以找到 sqrt(a) 个因数和对应的乘数.
+ * 所以, 我们可以把数字的变化记录下来, 比如, Pi=10, 我们可以有一个表 Ti,
+ * 因为 ceil(a/1), ceil(a/2)...对于 10 的值是 10, 5, 3, 3, 2, 2, 2, 2, 2, 1
+ * Ti 就是 10, -5, -2, 0, -1, 0, 0, 0, 0, -1, 0
+ * 如果我们对所有的 Ti 做矢量和运算, 我们就能得到总的变化向量.
+ * 那计算 sum(ceil(Pi/x)), 只需要将前 i 个数字相加即可...我算这个干什么...
+ *
+ * "I don't need that! The previous algorithm is fast enough. Please run it," you say impatiently.
+ * "Sigh. I won't tell you how to code the faster solution then. The answer is..." Everyone gasps while the program blinks. "... 42."
+ */

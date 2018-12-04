@@ -13,7 +13,7 @@ class BFF {
         $circle_start_at = [];
         $circle_len = [];
         $sets = [];
-        // 从入度为0的结点开始寻路, 直到遇到环
+        // 从入度为0的结点开始寻路, 直到遇到环 (一定会遇到环且只会遇到一个)
         foreach ($in as $u => $cnt) {
             if (isset($visited[$u])) continue;
 
@@ -36,29 +36,23 @@ class BFF {
         }
         // 以同一个2结点环中的结点为结束的路径
         $candidates = [];
-        $ends_at_circle = [];
+        $ends_at = [];
         foreach ($circle_len as $k => $len) {
             if ($len > 2) { $candidates[] = $len; continue; }
 
             $u = $circle_start_at[$k];
-            if (!isset($ends_at_circle[$u])) $ends_at_circle[$u] = [];
-            $ends_at_circle[$u][] = count($sets[$k]);
+            if (!isset($ends_at[$u])) $ends_at[$u] = 0;
+            if (count($sets[$k]) > $ends_at[$u]) $ends_at[$u] = count($sets[$k]);
         }
-        echo 'ends_at_circle: '; print_r($ends_at_circle);
-        // 找到以本结点为结束的最长的路径
-        $ends_at_circle_len = [];
-        foreach ($ends_at_circle as $name => $lens) {
-            rsort($lens);
-            foreach ($lens as $len) {
-                $ends_at_circle_len[$name] = $len;
-                if (isset ($ends_at_circle_len[$F[$name]]) ) $ends_at_circle_len[$name] -= 2;
-                break;
-            }
-        }
-        echo 'ends_at_circle_len: '; print_r($ends_at_circle_len);
+        echo 'ends_at: '; print_r($ends_at);
         // 相加以成为一个结果候选
         $l = 0;
-        foreach ($ends_at_circle_len as $name => $len) $l += $len;
+        $added = [];
+        foreach ($ends_at as $name => $len) {
+            $added[$name] = 1;
+            $l += $len;
+            if (isset($added[$F[$name]])) $l -= 2;
+        }
         $candidates[] = $l;
         echo 'candidates: '; print_r($candidates);
         // 排序返回最大的

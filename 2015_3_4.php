@@ -1,8 +1,9 @@
 <?php
 class LogSet {
 
-    public function solve($N, $E, $F) { echo 'solve: '; print_r(array_combine($E, $F));
-        $S = $this->findMagnitude($E, $F); echo 'S: '; print_r($S);
+    public function solve($N, $E, $F) {
+        $cnt = array_combine($E, $F); echo 'solve: '; print_r($cnt);
+        $S = $this->findMagnitude($cnt); echo 'S: '; print_r($S);
         if ($E[0] >= 0) return implode(' ', $S);
 
         $DP = [];
@@ -16,7 +17,6 @@ class LogSet {
             if ($DP[$n][$v] == 'T') $v -= $S[$n - 1];
         }
 
-        //print_r($R); exit;
         sort($R);
         return implode(' ', $R);
     }
@@ -38,8 +38,8 @@ class LogSet {
     }
 
     // 找绝对值的集合
-    public function findMagnitude($E, $F) {
-        $S = []; $cnt = array_combine($E, $F);
+    public function findMagnitude($cnt) {
+        $S = [];
         for ($K = 0; $K <= 60; $K ++) { // echo "before: $K\n"; print_r($cnt);
             // 计算总数量
             $n = 0;
@@ -53,14 +53,14 @@ class LogSet {
             // 找出最大的和次大的数字, 计算差值 d, S'中所有数字减去 d
             $d = $max - $second; // echo '|'.$d.', '.$n.'|';
             $S[] = $d;
-            // 如果 d = 0, 所有数字减半
-            if ($d == 0) {
+            // 相差 d 的数字两两配对, 保留一组
+            if ($d == 0) {      // 如果 d=0, 所有数字减半
                 foreach ($cnt as $k => $v) $cnt[$k] = $v / 2;
             } else {
-                foreach ($cnt as $k => $v) { // echo '|'.$k.'|';
-                    if ($k > $max - $d) break;
-                    if ($cnt[$k] == 0) continue;
-                    $cnt[$k + $d] -= $cnt[$k]; // 不能用 v, 因为 v 是初始值
+                foreach ($cnt as $k => $v) {     // echo '|'.$k.'|';
+                    if ($k > $max - $d) break;   // 小的那组的最大值是 max - d
+                    if ($cnt[$k] == 0) continue; // 已经被 k - d 匹配完了, 不做任何操作. 不能用 v.
+                    $cnt[$k + $d] -= $cnt[$k];   // 不能用 v, 因为 v 是初始值
                 }
                 foreach ($cnt as $k => $v) if ($cnt[$k] == 0) unset($cnt[$k]);
             }

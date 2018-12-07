@@ -29,8 +29,9 @@ class SmoothWindow {
         // 计算调整空间
         $A = 0;
         for ($g = 0; $g < $K; $g ++) $A += $L - $G[$g][1];
-        // echo 'K: '.$K.', L: '.$L.', Q: '.abs($Q % $K).', A: '.$A."\n";
-        return abs($Q % $K) <= $A ? $L : $L + 1;
+        // 调整空间只能向上, 所以如果 Q % K 小于0, 如 K=3, Q=-1, 加上 K 保持 Q 是正数
+        $Q = $Q % $K; if ($Q < 0) $Q += $K;
+        return $Q <= $A ? $L : $L + 1;
     }
 }
 
@@ -65,7 +66,8 @@ class Input {
 
 $t = time();
 
-$i = new Input('../下载/B-small-practice.in','../下载/OUT_2.txt');
+//$i = new Input('../下载/B-small-practice.in','../下载/OUT_2.txt');
+$i = new Input('../下载/B-large-practice.in','../下载/OUT_2.txt');
 $i->process();
 
 echo '<br/>execution time: '.(time() - $t).'<br/>';
@@ -104,6 +106,4 @@ echo '<br/>memory peak usage: '.(memory_get_peak_usage() / 1024 / 1024);
  * 如果还有剩, 每一组可以多分配 L-(hi(i)-lo(i))
  * 如果还有剩, 那只能扩大现有的最大范围差 L 了.
  * 将剩下的 Q, 选Q组分配 1, 这样最大范围差 + 1
- *
- * 不通过, 原因不明
  */

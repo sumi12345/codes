@@ -105,11 +105,22 @@ class Input {
 }
 
 $t = time();
-
-$i = new Input('IN.txt','OUT.txt');
-//$i = new Input('A-small-practice.in','OUT_1.txt');
-//$i = new Input('A-large-practice.in','OUT_1.txt');
+//$i = new Input('../下载/A-small-practice.in','../下载/OUT_1.txt');
+$i = new Input('../下载/A-large-practice.in','../下载/OUT_1.txt');
 $i->process();
 
 echo "\n".'execution time: '.(time() - $t);
 echo "\n".'memory peak usage: '.(memory_get_peak_usage() / 1024 / 1024);
+/**
+ * 在使用谷歌街景时, 你可以操作角色 Pegman.
+ * 今天, 一个恶作剧的用户将 Pegman 放在一个 R 行 C 列的矩阵中.
+ * 矩阵中的每一格可能是, 空白, 向上箭头, 向下箭头, 向右箭头, 向左箭头.
+ * Pegman 被放置在某个格子上, 如果格子为空白, 它就不动.
+ * 如果有箭头, 就沿着箭头走, 直到遇到另一个箭头, 改变方向继续走.
+ * 但是 Pegman 有可能走出矩阵的边缘! 你可以改变箭头的方向来防止这种情况发生.
+ * 箭头只能改变方向, 不能添加或删除. 求需要更改的箭头数量有多少.
+ * 思路:
+ * 如果 Pegman 走出边界, 那一定有一个箭头指向矩阵的边缘, 而没有其他箭头改变这一情况.
+ * 所以我们必须找到一个这样的箭头把它指向另一方向.
+ * 只要计算这样的箭头有多少. 如果他们中有任何一个没办法被改变方向, 返回 IMPOSSIBLE.
+ */

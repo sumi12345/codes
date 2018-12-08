@@ -42,9 +42,7 @@ class Input {
 
 $t = time();
 
-$i = new Input('IN.txt','OUT.txt');
-//$i = new Input('A-small-practice.in','OUT_1.txt');
-//$i = new Input('A-large-practice.in','OUT_1.txt');
+$i = new Input('../下载/A-small-practice.in','../下载/OUT_1.txt');
 $i->process();
 
 echo "\n".'execution time: '.(time() - $t);

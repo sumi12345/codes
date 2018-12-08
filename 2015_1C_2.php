@@ -88,9 +88,7 @@ class Input {
 
 $t = time();
 
-$i = new Input('IN.txt','OUT.txt');
-//$i = new Input('A-small-practice.in','OUT_1.txt');
-//$i = new Input('A-large-practice.in','OUT_1.txt');
+$i = new Input('../下载/B-small-practice.in','../下载/OUT_2.txt');
 $i->process();
 
 echo "\n".'execution time: '.(time() - $t);
@@ -103,4 +101,15 @@ echo "\n".'memory peak usage: '.(memory_get_peak_usage() / 1024 / 1024);
  * 重复 S 次, 得到一个长 S 的字符串.
  * 你有一个长 L 的目标词语. 你计划猴子打的字符串中每出现一次目标词语就奖励它一根香蕉.
  * 每次你必须带足够的香蕉, 然后根据猴子实际打的字奖励它. 求你能留下的香蕉的期望值.
+ *
+ * 思路: 这个问题有两部分, 计算你要带的香蕉的数量, 和计算所需香蕉的期望
+ * 比如, X = ABACABA, 要找一个长度为 S 的字符串, 包含最多次 X 的重复.
+ * 我们需要计算 X 前后重复的最大长度, 可以一个一个计算, 也可以用 KMP 算法.
+ * 要计算重复次数的期望, 我们先计算这个词在某个固定位置出现的概率 P.
+ * P 等于每个字母都打对的概率.
+ * 所以重复次数的期望是 P 乘以这个词出现的次数, 即 S-L+1.
+ * O = max_overlap(target)
+ * max_copies = 1.0 + (S-L) / (L-O)
+ * min_copies = P * (S-L+1)
+ * res = max_copies - min_copies
  */

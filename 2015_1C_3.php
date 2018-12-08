@@ -72,10 +72,7 @@ class Input {
 }
 
 $t = time();
-
-$i = new Input('IN.txt','OUT.txt');
-//$i = new Input('A-small-practice.in','OUT_1.txt');
-//$i = new Input('A-large-practice.in','OUT_1.txt');
+//$i = new Input('../下载/C-small-practice.in','../下载/OUT_3.txt');
 $i->process();
 
 echo "\n".'execution time: '.(time() - $t);
@@ -88,4 +85,13 @@ echo "\n".'memory peak usage: '.(memory_get_peak_usage() / 1024 / 1024);
  * 你不能违反规定, 但你刚好有权发行新面值的硬币.
  * 你想在符合规定的情况下, 使付 1-V 元成为可能, 并且确保引入的新面值货币最少.
  * 求至少需要发行多少新面值硬币?
+ *
+ * 思路:
+ * 我们会逐步建立一组面值组合 S. N 是我们能付的最多的钱. 1-N 都能付.
+ * 当我们加一个新面值 X 到 S 的时候, 新组合就能够付 N + X * C 元钱.
+ * 所以我们将 S 设为空集, N = 0;
+ * 当 N < V 的时候, 我们做下面的操作:
+ * 最小的我们不能付的面值是 N + 1.
+ * 如果存在一个已有面值, 我们还没使用, 且 <= N+1, 将它加入篮子, N = N + X * C
+ * 否则我们必须发行新货币. X = N + 1. N = N + X * C
  */

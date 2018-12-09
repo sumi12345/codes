@@ -3,43 +3,19 @@ ini_set("max_execution_time","3");
 ini_set("memory_limit","3M");
 
 class Money {
-    /**
-     * 解决方法
-     * 如果 1~N 都可以买到, 那么加上 N + 1 面值可以买到 1 ~ N + (N + 1) * C
-     * @param $C int 最多可以使用的硬币数量
-     * @param $D int 目前有的硬币面值数量
-     * @param $V int 最多需要支持支付额度
-     * @param $denomination array 目前有的额度
-     */
-    public function solve($C, $D, $V, $denomination) {
-        sort($denomination);
-
-        $S = array();
-        $T = 0;
-
-        for ($i = 1; $i < $V; $i ++) {
-            // 如果有小于等于这个面值的货币 加入篮子
-            while (!empty($denomination) && $denomination[0] <= $i) {
-                $T += $denomination[0] * $C;
-                array_shift($denomination);
+    public function solve($C, $D, $V, $E) { echo 'solve (C='.$C.', V='.$V.', E='.implode(' ', $E).")\n";
+        $S = []; $p = 0;                 // 现有面值 E 已经升序排序
+        for ($N = 0; $N < $V;) {         // 循环直到能表示的面值 N 到达 V
+            if ($p < $D && $E[$p] <= $N + 1) for (; $p < $D; $p ++) {
+                if ($E[$p] > $N + 1) break;
+                $N += $C * $E[$p]; echo $E[$p].', '.$N.'|';
+            } else {
+                $S[$N + 1] = 1;    echo ($N + 1).', '.($N + $C * ($N + 1)).'|';
+                $N += $C * ($N + 1);
             }
-
-            // 如果这个面值买不到, 作为新货币, 加入篮子
-            if ($T < $i) {
-                $T += $i * $C;
-                $S[] = $i;
-            }
-
-            echo "\n".$i.'|'.$T;
-
-            // 找下一个
-            $i = $T;
         }
-
-        echo "\n".'new denomination: '.implode(', ', $S);
         return count($S);
     }
-
 }
 
 class Input {
@@ -73,6 +49,7 @@ class Input {
 
 $t = time();
 //$i = new Input('../下载/C-small-practice.in','../下载/OUT_3.txt');
+$i = new Input('../下载/C-large-practice.in','../下载/OUT_3.txt');
 $i->process();
 
 echo "\n".'execution time: '.(time() - $t);

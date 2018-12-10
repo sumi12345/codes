@@ -1,47 +1,37 @@
 <?php
-ini_set("max_execution_time","10");
-ini_set("memory_limit","30M");
+ini_set("max_execution_time","6");
+ini_set("memory_limit","60M");
 
-class Couter {
+class Counter {
+    public function __construct() {
+        $this->L = $this->solve_small(999999);
+    }
 
     public function solve($N) {
-        $this->tree = array(1 => 1);  // 叶子节点
-        $this->archived = array();    // 非叶子节点
-        while (!isset($this->archived[$N]) && !isset($this->tree[$N])) $this->bfs($N);
-
-        if (isset($this->archived[$N])) return $this->archived[$N];
-        return $this->tree[$N];
+        if ($N <= 999999) return $this->L[$N];
+        if ($N == 1000000) return $this->L[999999] + 1;
+        return $this->solve_large($N);
     }
 
-    private function bfs($N) {
-        foreach ($this->tree as $num => $cnt) {
-            $r = $num + 1;
-            if (!isset($this->tree[$r])) {
-                $this->tree[$r] = $this->tree[$num] + 1;
-            }
-            if ($r == $N) return;
+    private function solve_large($N) {
+        return 0;
+    }
 
-            $r = $this->reverse($num);
-            if (!isset($this->tree[$r])) {
-                $this->tree[$r] = $this->tree[$num] + 1;
-            }
-            if ($r == $N) return;
-
-            $this->archived[$num] = $this->tree[$num];
-            unset($this->tree[$num]);
+    // 构造一个表记录长度, 小数据集 999999 查表即可
+    private function solve_small($N) {
+        $queue = [1]; $len = [1 => 1];
+        while(!empty($queue)) {
+            $n = array_shift($queue);
+            if (!isset($len[$n + 1]) && $n + 1 <= $N) { $queue[] = $n + 1; $len[$n + 1] = $len[$n] + 1; }
+            $r = $this->reverse($n);  // 要阻止从大数翻转回小数, 所以动态规划也可以
+            if ($r > $n && !isset($len[$r]) && $r <= $N) { $queue[] = $r; $len[$r] = $len[$n] + 1; }
         }
+        return $len;
     }
 
-    private function reverse($num) {
-        $r = 0;
-        while($num > 0) {
-            $n = $num % 10;
-            $r = $r * 10 + $n;
-            $num = floor($num / 10);
-        }
-        return $r;
+    private function reverse($N) {
+        return implode('', array_reverse(str_split(''.$N, 1)));
     }
-
 }
 
 class Input {
@@ -58,7 +48,7 @@ class Input {
         if ($handle) {
             $cases = intval(fgets($handle, 32));
             file_put_contents($this->out_file, '');
-            $C = new Couter();
+            $C = new Counter();
             for($c = 1; $c <= $cases; $c ++) {
                 echo 'Case #'.$c.': ';
                 file_put_contents($this->out_file, 'Case #'.$c.': ', FILE_APPEND);
@@ -73,7 +63,7 @@ class Input {
 }
 
 $t = time();
-//$i = new Input('../下载/A-small-practice.in','../下载/OUT_1.txt');
+$i = new Input('../下载/A-small-practice.in','../下载/OUT_1.txt');
 //$i = new Input('../下载/A-large-practice.in','../下载/OUT_1.txt');
 $i->process();
 

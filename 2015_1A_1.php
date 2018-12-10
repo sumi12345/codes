@@ -65,11 +65,22 @@ class Input {
 }
 
 $t = time();
-
-$i = new Input('in.txt','OUT_1.txt');
-//$i = new Input('A-small-practice.in','OUT_1.txt');
-//$i = new Input('A-large-practice.in','OUT_1.txt');
+//$i = new Input('../下载/A-small-practice.in','../下载/OUT_1.txt');
+$i = new Input('../下载/A-large-practice.in','../下载/OUT_1.txt');
 $i->process();
 
 echo "\n".'execution time: '.(time() - $t);
 echo "\n".'memory peak usage: '.(memory_get_peak_usage() / 1024 / 1024);
+/**
+ * Kaylin 喜欢吃蘑菇. Kaylin 吃蘑菇, Bartholomew 放蘑菇.
+ * 我们每 10 秒看一次盘子里的蘑菇数量.
+ * 我们想知道 Kaylin 至少吃掉了多少蘑菇, 有两种可能:
+ * 1. Kaylin 能在任何时候吃掉任何数量的蘑菇.
+ * 2. 只要盘子里有蘑菇, Kaylin 就以恒定的速度吃蘑菇.
+ * 计算两种可能下, Kaylin 至少吃掉了多少蘑菇.
+ *
+ * 思路:
+ * 第一种情况, 每次盘子里的蘑菇减少了, 那就一定是被吃掉了.
+ * 第二种情况, 首先我们要确定 Kaylin 每 10 秒最多能吃多少, 比如 k 个.
+ * 那么只要前一次盘子里有 k 个, 那一定都被吃掉了.
+ */

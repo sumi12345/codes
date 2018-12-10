@@ -5,57 +5,57 @@ ini_set("memory_limit","3M");
 class Neighbors {
 
     public function solve($R, $C, $N) {
-        // 一定可以为0
+        // 可以棋盘形摆放
         if ($N <= ceil($R * $C / 2)) return 0;
-
-        // 住满的 unhappiness
-        $unhappiness = 2 * $R * $C - $R - $C; //($R - 1) * $C + ($C - 1) * $R
-        $K = $R * $C - $N;  // 要搬走的人数
-
-        // 只有一行/一列
-        if ($R == 1 || $C == 1) {
-            return $K * 2;
-        }
-
-        // 行或列是偶数
-        if ($R % 2 == 0 || $C % 2 == 0) {
-            $S = $this->score_even($K, $R, $C);
-            return $unhappiness - $S;
-        }
-
-        // 如果行列都是奇数
-        // 方法1 移除中心
-        $K1 = $K;
-        $S1 = 0;
-        if ($K1 > 0) $S1 += $this->get_score($K1, ceil(($R - 2) * ($C - 2) / 2), 4);
-        if ($K1 > 0) $S1 += $this->get_score($K1, $R + $C - 2, 3);  // floor($R / 2) * 2 + floor($C / 2) * 2
-        if ($K1 > 0) $S1 += $this->get_score($K1, 4, 2);
-
-        // 方法2 不移除中心
-        $K2 = $K;
-        $S2 = 0;
-        if ($K2 > 0) $S2 += $this->get_score($K2, floor(($R - 2) * ($C - 2) / 2), 4);
-        if ($K2 > 0) $S2 += $this->get_score($K2, $R + $C + 2, 3);  // ceil($R / 2) * 2 + ceil($C / 2) * 2
-
-        $S = max($S1, $S2);
-        return $unhappiness - $S;
+        // 住满的不幸福指数, 要移除的租客数目
+        $U = ($R - 1) * $C + ($C - 1) * $R;  $K = $R * $C - $N;
+        // 只有 1 行或 1 列
+        if ($R == 1 || $C == 1) return $U - 2 * $K;
+        // 行列有偶数
+        if ($R % 2 == 0 || $C % 2 == 0) return $this->count_even($R, $C, $U, $K);
+        // 行列都是奇数
+        return min($this->count_odd_1($R, $C, $U, $K), $this->count_odd_2($R, $C, $U, $K));
     }
 
-    // 行或列是偶数的情况
-    private function score_even($K, $R, $C) {
-        $S = 0;
-        if ($K > 0) $S += $this->get_score($K, ($R - 2) * ($C - 2) / 2, 4);
-        if ($K > 0) $S += $this->get_score($K, $R + $C - 4, 3);
-        if ($K > 0) $S += $this->get_score($K, 2, 2);
-        return $S;
+    private function count_even($R, $C, $U, $K) { // 图 1 图 2
+        $m4 = ($R - 2) * ($C - 2) / 2;            // 移除一个减 4
+        $m3 = ($R - 2) + ($C - 2);                // 移除一个减 3
+        $m2 = 2;                                  // 移除一个减 2
+        return $this->remove_tenant($U, $K, $m4, $m3, $m2);
     }
 
-    private function get_score(&$to_be_removed, $max_num, $score_per_remove) {
-        $r = $to_be_removed > $max_num ? $max_num : $to_be_removed;
-        $to_be_removed -= $r;
-        return $score_per_remove * $r;
+    private function count_odd_1($R, $C, $U, $K) {  // 图 3
+        $m4 = ceil(($R - 2) * ($C - 2) / 2);
+        $m3 = floor(($R - 2) / 2) * 2 + floor(($C - 2) / 2) * 2;
+        $m2 = 4;
+        return $this->remove_tenant($U, $K, $m4, $m3, $m2);
+    }
+
+    private function count_odd_2($R, $C, $U, $K) {  // 图 4
+        $m4 = floor(($R - 2) * ($C - 2) / 2);
+        $m3 = ceil(($R - 2) / 2) * 2 + ceil(($C - 2) / 2) * 2;
+        return $this->remove_tenant($U, $K, $m4, $m3);
+    }
+
+    // 计算返回值
+    private function remove_tenant($U, $K, $m4, $m3, $m2 = 0) {
+        $n = $m4;
+        if ($K <= $n) return $U - 4 * $K;
+        $U -= $n * 4; $K -= $n;
+
+        $n = $m3;
+        if ($K <= $n) return $U - 3 * $K;
+        $U -= $n * 3; $K -= $n;
+
+        if ($K <= $m2) return $U - 2 * $K;
     }
 }
+$N = new Neighbors();
+echo $N->solve(2, 3, 6)."\n";
+echo $N->solve(4, 1, 2)."\n";
+echo $N->solve(3, 3, 8)."\n";
+echo $N->solve(5, 2, 0)."\n";
+//exit;
 
 class Input {
     private $in_file;
@@ -87,7 +87,7 @@ class Input {
 
 $t = time();
 //$i = new Input('../下载/B-small-practice.in','../下载/OUT_2.txt');
-//$i = new Input('../下载/B-large-practice.in','../下载/OUT_2.txt');
+$i = new Input('../下载/B-large-practice.in','../下载/OUT_2.txt');
 $i->process();
 
 echo "\n".'execution time: '.(time() - $t);

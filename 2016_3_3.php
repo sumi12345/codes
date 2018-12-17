@@ -7,7 +7,7 @@ class Rebel {
 
     // 小数据集, 行星不移动, 只要找个行星跳
     public function solve_small($N, $S, $A) { //echo 'solve('.$N.', '.$S.', '; print_r($A); exit;
-        $C = [];
+        $C = [];     // 行星之间的距离
         for ($i = 0; $i < $N; $i ++) {
             for ($j = $i + 1; $j < $N; $j ++) {
                 $d = pow($A[$i][0] - $A[$j][0], 2) + pow($A[$i][1] - $A[$j][1], 2) + pow($A[$i][2] - $A[$j][2], 2);
@@ -15,28 +15,25 @@ class Rebel {
                 $C[$j][$i] = $d;
             }
         }
-        //print_r($C); exit;
         // Dijkstra
-        $D = $C[0];
+        $D = $C[0];   // 从行星 0 到另一个行星, 最小化跳跃距离方案下, 最大跳跃距离
         $visited = [0 => 1];
-        $pre = 0;
-        for ($k = 0; $k < 100; $k ++) {         // 循环直到到达所有结点
-            $min_d = 3000000; $new = -1;        // 找前一个结点连接的新最短路径
-            for ($v = 0; $v < $N; $v ++) {
-                if (isset($visited[$v])) continue;
-                if ($C[$pre][$v] <= $min_d) { $min_d = $C[$pre][$v]; $new = $v; }
-            }
+        for ($k = 0; $k < 1000; $k ++) {         // 循环直到到达所有结点
+            // echo 'D: '.implode(' ', $D)."\n";
+            $min_d = 3000000; $new = -1;        // 找出从 0 出发, 还没访问的, 跳跃距离最小的行星
             for ($v = 1; $v < $N; $v ++) {
-                if ($v == $new) continue;
+                if (isset($visited[$v])) continue;
+                if ($D[$v] <= $min_d) { $min_d = $D[$v]; $new = $v; }
+            }
+            $visited[$new] = 1; // echo 'new: '.$new."\n";
+            for ($v = 1; $v < $N; $v ++) {     // 所有未访问的行星, 更新从这个行星出发的最大跳跃距离
+                if (isset($visited[$v])) continue;
                 $D[$v] = min($D[$v], max($D[$new], $C[$new][$v]));
             }
-            $visited[$new] = 1;
-            $pre = $new;
-            //echo 'new: '.$new.', current D[1]: '.$D[1]."\n";
-            if (count($visited) == $N) break;
+            if (isset($visited[1])) break;
         }
-
         // 返回最大距离
+        // if (!isset($visited[1])) exit('not reached');
         return sqrt($D[1]);
     }
 
@@ -66,7 +63,7 @@ class Input {
                 $S = explode(' ', trim(fgets($handle)));
                 $N = $S[0]; $S = $S[1]; $A = [];
                 for ($i = 0; $i < $N; $i ++) { $A[] = explode(' ', trim(fgets($handle))); }
-                $R = new Rebel();
+                $R = new Rebel(); // if ($c != 3) continue;
                 $r = $R->solve($N, $S, $A);
                 echo ($r)."\n";
                 file_put_contents($this->out_file, ($r).($c == $cases ? "" : "\r\n"), FILE_APPEND);

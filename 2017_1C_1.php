@@ -7,26 +7,36 @@ class Syrup {
         arsort($side);
 
         // 按照底面面积 + 侧面面积从大到小排序
-        $bottom = [];
+        $bottom = []; $max_b = 0;
         for ($i = 0; $i < $N; $i ++) $bottom[$i] = $R[$i] * (0.5 * $R[$i] + $H[$i]);
-        asort($bottom);
+        arsort($bottom);
 
-        // 选择一个底面, 和 K - 1 个侧面
-        $max_area = -1;
-        foreach ($bottom as $b => $ba) {
-            $k = 0; $total = $ba;
-            if ($total > $max_area) $max_area = $total;  // K = 1 的情况
-            foreach ($side as $s => $sa) {
-                if ($R[$s] > $R[$b] || $s == $b) continue;
-                $total += $sa; $k ++;
-                if ($k == $K - 1) {
-                    if ($total > $max_area) $max_area = $total;
-                    break;
-                }
-            }
+        // K = 1 的情况
+        if ($K == 1) {
+            foreach ($bottom as $b => $ba) { $max_b = $ba; break; }
+            return 2 * pi() * $max_b;
         }
 
-        return 2 * pi() * $max_area;
+        // 选择侧面积最大的前 K - 1 个
+        $total = 0; $max_r = 0; $ka = 0; $k = 0;  // 总侧面积, 最大半径, 半径在 K - 1 范围内的下一个
+        foreach ($side as $s => $sa) {
+            if ($k < $K - 1) {
+                $total += $sa;
+                if ($R[$s] > $max_r) $max_r = $R[$s];
+            } elseif ($R[$s] <= $max_r) {
+                $ka = $sa; break;
+            }
+            $k ++;
+        }
+        $opt_1 = 0.5 * $max_r * $max_r + $ka + $total;
+
+        $new_b = 0;
+        foreach ($bottom as $b => $ba) {
+            if ($R[$b] > $max_r) { $new_b = $ba; break; }
+        }
+        $opt_2 = $new_b + $total;
+
+        return 2 * pi() * max($opt_1, $opt_2);
     }
 }
 

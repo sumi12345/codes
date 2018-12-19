@@ -6,35 +6,44 @@ class CoreTraining {
     }
 
     private function solve_small($N, $K, $U, $P) {
+        sort($P);
         $P = $this->distributeUnit($N, $U, $P, 0);
-        $p = 1; for ($i = 0; $i < $N; $i ++) $p *= $P[$i];
+        $p = $this->calculateProbability($P, $N, $K);
         return number_format($p, 8);
     }
 
     private function solve_large($N, $K, $U, $P) {
+        sort($P);
         $max_p = 0;
         for ($i = 0; $i < $N; $i ++) {  // 把训练单元都给第 i 开始的核心
-            $p = $this->distributeUnit($N, $U, $P, $i);
-            if ($p === false) break;
-            $p = $this->calculateProbability($p, $N, $K);
+            $new_p = $this->distributeUnit($N, $U, $P, $i);
+            $p = $this->calculateProbability($new_p, $N, $K);
             if ($p > $max_p) $max_p = $p;
+            if ($i > 0 && $new_p[$i - 1] > $P[$i - 1]) break;
         }
-        return $max_p;
+        return number_format($max_p, 8);
     }
 
-    private function distributeUnit($N, $U, $P, $I) {
-        sort($P); $P[] = 1; $total = 0;
+    private function distributeUnit($N, $U, $P, $I) { echo 'distributeUnit('.$I.', '.$U.')'."\n";
+        $p = 0; for ($i = 0; $i < $N; $i ++) $p += $P[$i]; // echo $p.'+'.$U.'='.($p + $U)."\n";
+        if (''.($p + $U) == $N) { for ($i = 0; $i < $N; $i ++) $P[$i] = 1; return $P; }
+        if ($U == 0) return $P;
+
+        $P[] = 1; $total = 0;
         for ($i = $I + 1; $i <= $N; $i ++) {  // 从 i - 1 提高到 i 的水平需要多少单元
-            $u = $P[$i] - $P[$i - 1]; $n = $i - $I; echo $u.','.$n.','.($total + $u * $n).'|';
-            if ($total + $u * $n >= $U) {
+            $u = $P[$i] - $P[$i - 1]; $n = $i - $I;
+            if ($total + $u * $n >= $U) { echo "用完啦!\n";
                 $p = ($U - $total) / $n;
                 for ($j = $I; $j < $i; $j ++) $P[$j] = $P[$i - 1] + $p;
                 $total += $p * $n;
                 break;
             }
             $total += $u * $n;
+            for ($j = $I; $j < $i; $j ++) $P[$j] = $P[$i];  // 没用完也要更新
         }
-        if ($U - $total > 0) $P[$I - 1] = $P[$I - 1] + $U - $total > 1 ? 1 : $P[$I - 1] + $U - $total;
+        if ($U - $total > 0) { echo "没用完!\n"; print_r($P);
+            $P[$I - 1] += $U - $total;
+        }
         unset($P[$N]); return $P;
     }
 
@@ -74,9 +83,9 @@ class Input {
                 echo 'Case #'.$c.': ';
                 file_put_contents($this->out_file, 'Case #'.$c.': ', FILE_APPEND);
                 $N = explode(' ', trim(fgets($handle)));
-                $U = trim(fgets($handle));
+                $U = floatval(fgets($handle));
                 $P = explode(' ', trim(fgets($handle)));
-                $C = new CoreTraining(); // if ($c != 1) continue;
+                $C = new CoreTraining(); // if ($c != 56) continue;
                 $r = $C->solve($N[0], $N[1], $U, $P);
                 echo ($r)."\n";
                 file_put_contents($this->out_file, ($r).($c == $cases ? "" : "\r\n"), FILE_APPEND);
@@ -87,9 +96,9 @@ class Input {
 }
 
 $t = time();
-$i = new Input('../下载/IN.txt','../下载/OUT_3.txt');
+//$i = new Input('../下载/IN.txt','../下载/OUT_3.txt');
 //$i = new Input('../下载/C-small-practice-1.in','../下载/OUT_3.txt');
-//$i = new Input('../下载/C-small-practice-2.in','../下载/OUT_3.txt');
+$i = new Input('../下载/C-small-practice-2.in','../下载/OUT_3.txt');
 $i->process();
 
 echo "\n".'execution time: '.(time() - $t)."\n";

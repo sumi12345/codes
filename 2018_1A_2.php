@@ -10,7 +10,7 @@ function solve($R, $B, $C, $M, $S, $P) {
     rsort($max_time);
     // binary search T
     $l = 0; $h = $max_time[0];
-    for ($K = 0; $K < 100; $K ++) {
+    for ($K = 0; $K < 100; $K ++) {      // 循环直到找到一个数, K 理论上是 log(2, 10^9)
         $m = $l + floor(($h - $l) / 2);
         if ($m == $l || $m == $h) break; // 数字大了之后就可能出现 m = h
 
@@ -20,7 +20,7 @@ function solve($R, $B, $C, $M, $S, $P) {
     }
     dd(number_format($l, 0, '.', ''), 'l');
     dd(number_format($h, 0, '.', ''), 'h');
-    for ($K = 1; $K <= $h - $l; $K ++) {
+    for ($K = 1; $K <= $h - $l; $K ++) { // 没有用, 超过了表示精度, 比如, l: 221471461444294272, h: 221471461444294304, l + 1 还是 l
         dd(number_format($l + $K, 0, '.', ''), 'l + K');
         if (item_by_time($l + $K, $R, $B, $C, $M, $S, $P) >= $B) return $l + $K;
     }
@@ -76,7 +76,7 @@ if (ENV == 'test') {
 }
 
 //---- start process ----
-//file_put_contents('../下载/IN.txt', "100\n"); for ($i = 0; $i < 100; $i ++) fake($i + 1, $hw);
+file_put_contents('../下载/IN.txt', "100\n"); for ($i = 0; $i < 100; $i ++) fake();
 $T = read($hr);
 for ($c = 1; $c <= $T; $c ++) {
     write('Case #'.$c.': ', $hw);
@@ -88,7 +88,3 @@ for ($c = 1; $c <= $T; $c ++) {
     }
     write(solve($conf[0], $conf[1], $conf[2], $M, $S, $P)."\n", $hw);
 }
-/**
- * 大数据集不通过, 然而不想管了. 原因是, 到某个数字之后, 再往上加 1 已经不奏效了
- * 比如, l: 221471461444294272, h: 221471461444294304, l + 1 还是 l
- */

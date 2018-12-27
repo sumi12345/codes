@@ -13,6 +13,7 @@ class Counter {
         return $this->solve_large($N);
     }
 
+    // 大数据集未解决
     private function solve_large($N) {
         return 0;
     }

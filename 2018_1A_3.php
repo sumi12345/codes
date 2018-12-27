@@ -10,7 +10,8 @@ function solve($N, $P, $W, $H) {
 function solve_large($N, $P, $W, $H) {
     // sum of the perimeters of all cookies before any cuts are made
     $sum = 0;
-    for ($i = 0; $i < $N; $i ++) $sum += 2 * ($W[$i] + $H[$i]); dd($P, 'P'); dd($sum, 'sum');
+    for ($i = 0; $i < $N; $i ++) $sum += 2 * ($W[$i] + $H[$i]);
+    dd($N, 'N'); dd($P, 'P'); dd($P - $sum, 'P-sum');
     // range of extra perimeters each cookie can provide
     $low = []; $high = [];
     for ($i = 0; $i < $N; $i ++) {
@@ -23,7 +24,7 @@ function solve_large($N, $P, $W, $H) {
     if ($sum + $h < $P) return $sum + $h;
     // if P is reachable, find a subset
     $str = ''; $DP = [];
-    $r = $sum + nextItem($str, $P - $sum, $low, $high, $DP); dd($P - $sum, 'P - sum'); dd($DP, 'DP');
+    $r = $sum + nextItem($str, $P - $sum, $low, $high, $DP); dd($DP, 'DP');
     return $r;
 }
 
@@ -36,14 +37,16 @@ function nextItem($str, $p, $low, $high, &$DP) {
     // reach the max digit
     if ($len == count($low)) { $DP[$str] = min($higher_sum, $p); return $DP[$str]; }
     // no necessary to continue
-    $l = $low[$len]; $h = $high[$len]; dd($l.', '.$h, 'range of next digit of '.$str);
-    if ($lower_sum + $l > $p) { $DP[$str] = min($higher_sum, $p); dd($str, 'no more'); return $DP[$str]; }  // no more
-    if ($higher_sum + $h >= $p) { $DP[$str] = $p; dd($str, 'hit'); return $p; } // hit at this digit
+    $l = $low[$len]; $h = $high[$len]; dd($l.', '.$h, 'range of next ['.$str.']');
+    if ($lower_sum + $l <= $p && $higher_sum + $h >= $p) {  // hit
+        $DP[$str.'*'] = $p; dd($str, 'hit'); return $p;
+    }
     // check next digit
-    $r1 = nextItem($str.'1', $p, $low, $high, $DP);     // with
-    if ($r1 == $p) { $DP[$str] = $p; dd($str, 'with'); return $p; }
+    $r1 = ($lower_sum + $l > $p) ? false : nextItem($str.'1', $p, $low, $high, $DP); // with
+    if ($r1 !== false && $r1 == $p) { $DP[$str] = $p; dd($str, 'with'); return $p; }
     $r2 = nextItem($str.'0', $p, $low, $high, $DP);     // without
-    $DP[$str] = max($r1, $r2); dd($str, 'with or without'); return $DP[$str];
+    $DP[$str] = $r1 === false ? $r2 : max($r1, $r2); dd('with or without ['.$str.']');
+    return $DP[$str];
 }
 
 function solve_small($N, $P, $W, $H) {
@@ -61,14 +64,14 @@ function solve_small($N, $P, $W, $H) {
 }
 
 function fake() {
-    $N = rand(1, 100); $W = []; $H = []; $sum = 0; $diag_sum = 0;
+    $N = rand(1, 5); $W = []; $H = []; $sum = 0; $diag_sum = 0;
     for ($i = 0; $i < $N; $i ++) {
-        $w = rand(1, 250); $h = rand(1, 250);
-        if ($i > 0) { $w = $W[$i - 1]; $h = $H[$i - 1]; }
+        $w = rand(1, 5); $h = rand(1, 5);
+        //if ($i > 0) { $w = $W[$i - 1]; $h = $H[$i - 1]; }
         $W[] = $w; $H[] = $h;
         $sum += 2 * $w + 2 * $h; $diag_sum += 2 * sqrt($w * $w + $h * $h);
     }
-    $P = rand($sum, $sum + floor($diag_sum / 2));
+    $P = rand($sum, $sum + ceil($diag_sum));
     $in = $N.' '.$P."\n";
     for ($i = 0; $i < $N; $i ++) $in .= $W[$i].' '.$H[$i]."\n";
     file_put_contents('../下载/IN.txt', $in, FILE_APPEND);

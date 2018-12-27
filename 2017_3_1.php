@@ -20,10 +20,9 @@ function solve($G) { dd($G, 'solve');
     // number of possible ancestor
     $ancestor = [];
     foreach ($visited as $g => $v) $ancestor[$g] = countAncestor($g);
-    // dd($ancestor, 'ancestor');
     // BFS count all middle nodes
     $queue = [$G]; $v = [$G => 1]; $leaves = 0;
-    for ($K = 0; $K < 100000; $K ++) {  // 循环直到队列为空
+    for ($K = 0; $K < 100000; $K ++) {
         if (empty($queue)) break;
         $g = array_shift($queue);
         if (!isset($decay_link[$g])) $leaves += $ancestor[$g];
@@ -35,18 +34,22 @@ function solve($G) { dd($G, 'solve');
     return $leaves + count($v);
 }
 
+// pitfalls: str 不能是数组, str[l]=i, 因为赋值之后长度回不来
 function generateDigit($str, $L, &$visited) {
-    // dd($str, 'generateDigit');
+    // length of current string, if l = L, then record
     $l = strlen($str);
     if ($l == $L) { $visited[$str] = 1; return; }
+    // find the max value of this digit
     $sum = 0;
     for ($i = 0; $i < $l; $i ++) $sum += $str[$i];
     $max = $L - $sum;
+    // get next digit
     for ($i = 0; $i <= $max; $i ++) {
         generateDigit($str.$i, $L, $visited);
     }
 }
 
+// pitfalls: PHP 把 visited key 的字符串转换成 int 了, 所以 G[i] 为空
 function decay($G) { $G = ''.$G;
     $cnt = []; $L = strlen($G);
     for ($i = 1; $i <= $L; $i ++) $cnt[$i] = 0;
@@ -55,6 +58,7 @@ function decay($G) { $G = ''.$G;
     return implode('', $cnt);
 }
 
+// pitfalls: left = 0 的时候不该调用 C(0, 0)
 function countAncestor($G) { $G = ''.$G; // dd($G, 'countAncestor');
     $l = strlen($G);
     $left = $l; $p = 1;
@@ -65,14 +69,15 @@ function countAncestor($G) { $G = ''.$G; // dd($G, 'countAncestor');
     return $p;
 }
 
+// pitfalls: 需要初始化 n=0 和 n=1 的情况, 否则会无限递归调用下去
 class Util {
     static $c = [];
     static function C($m, $n) {
-        if ($m < 0 || $n < 0 || $m < $n) return 0;
         if ($n > ceil($m / 2)) $n = $m - $n;
         if (!isset(self::$c[$m][$n])) {
             if (!isset(self::$c[$m])) self::$c[$m] = [];
             if ($n == 0) { self::$c[$m][$n] = 1; }
+            elseif ($n == 1) { self::$c[$m][$n] = $m; }
             else {
                 self::$c[$m][$n] = self::C($m - 1, $n) + self::C($m - 1, $n - 1);
             }

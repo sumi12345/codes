@@ -3,9 +3,10 @@ define('ENV', 'test');
 
 function solve($N, $L, $C) {
     $unit = 1 / $N * 100; dd('N='.$N.', unit='. $unit, 'solve'); dd($C, 'C');
+
     // how many support you need to form a group can be rounded up
     $new_lang = need(0, $unit);
-    if ($new_lang == 0) return 100;
+    if ($new_lang == 0) return 100;    // unit is int
     dd($new_lang, 'new_lang');
 
     $old_lang = [];
@@ -14,6 +15,7 @@ function solve($N, $L, $C) {
     }
     dd($old_lang, 'old_lang');
 
+    // distribute the rest to existing group by need
     $support_rate = [];
     $cnt = $N; foreach ($C as $l => $n) $cnt -= $n;
     asort($old_lang);
@@ -23,11 +25,15 @@ function solve($N, $L, $C) {
         $cnt -= $n;
     }
     dd($support_rate, 'support_rate_1');
+
+    // groups getting no more support
     foreach ($C as $l => $n) {
         if (isset($support_rate[$l])) continue;
         $support_rate[$l] = round($unit * $C[$l]);
     }
     dd($support_rate, 'support_rate_2');
+
+    // return
     $total = 0; foreach ($support_rate as $r) $total += $r;
     $new_up = floor($cnt / $new_lang) * round($new_lang * $unit);
     $new_down = ($cnt % $new_lang) * $unit;
@@ -36,14 +42,14 @@ function solve($N, $L, $C) {
 }
 
 function need($current_support, $unit) {
-    $current_rate = $current_support * $unit; //dd($current_support.', '.$current_rate, 'need');
-    if (round($current_rate) > $current_rate) return 0;
-    $i = floor($current_rate); if ($i + 0.5 < $current_rate) $i += 1;
-    while ($i < 100) {
-        $n0 = ceil(($i + 0.5) / $unit);
+    $current_rate = $current_support * $unit;
+    if (round($current_rate) > $current_rate) return 0;          // already can be rounded up
+    $i = floor($current_rate); if ($i + 0.5 < $current_rate) $i += 1;   // find a start point
+    while ($i < 100) {                                           // check 0.5, 1.5, ..., 99.5
+        $n0 = ceil(($i + 0.5) / $unit);       // at least how many support you need to reach i + 0.5
         $n = $n0 * $unit; dd('i='.$i.', n0='.$n0.', n='.$n);
-        if (round($n) > $n) return $n0 - $current_support;
-        $i = max(floor($n), $i + 1);
+        if (round($n) > $n) return $n0 - $current_support;      // if round(n) < n, impossible in this range
+        $i = max(floor($n), $i + 1);                    // next i
     }
     return 0;
 }

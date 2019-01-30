@@ -1,69 +1,78 @@
 <?php
 define('ENV', 'test');
 
-function solve($N, $A) {
+function solve($A) {
     // every ID and records about them R = [ID => [idx => action]]
-    $R = []; $R[0] = []; $first = []; $last = [];
+    $R = []; $R[0] = [];
     foreach ($A as $k => $a) {
         if (!isset($R[$a[1]])) $R[$a[1]] = [];
         $R[$a[1]][$k] = $a[0];
-        if ($a[1] != 0) $last[$a[1]] = $k;
-        if ($a[1] != 0 && !isset($first[$a[1]])) $first[$a[1]] = $k;
     }
-    dd($R, 'R');
-    // for every ID which is not 0, try to prove there is no other door
-    foreach ($R as $id => $v) if ($id > 0) {
-        $r = strait($id, $R);
-        if ($r === false) return 'CRIME TIME';
-    }
-    // for every ID which is not 0, if first action is L or last is E
-    foreach ($first as $id => $k) if ($A[$k][0] == 'E') unset($first[$id]);
-    foreach ($last as $id => $k) if ($A[$k][0] == 'L') unset($last[$id]);
-    rsort($first); sort($last);  // drop id and sort by time
-    dd(implode(' ', $first), 'first leave');
-    dd(implode(' ', $last), 'last stay');
+    // try to prove there is no other door
+    foreach ($A as $k => $a) dd($a[0].' '.$a[1], '-'.$k);
+    $r = strait($A, $R);
+    foreach ($A as $k => $a) dd($a[0].' '.$a[1], '+'.$k);
+    if ($r === false) return 'CRIME TIME';
     // count R[0]
-    $stack = [];
+    ksort($R[0]); $stack = [];
     foreach ($R[0] as $k => $a) {
         if ($a == 'E') { $stack[] = $k; continue; }
-        $m = false;   // if a = L, match found in last stay
-        foreach ($last as $p => $ke) if ($ke < $k) {
-            unset($last[$p]); $R[0][$k] .= '<-'.$ke; $m = true; break;
-        }
-        if (!$m && count($stack) > 0) array_pop($stack);
+        if (count($stack) > 0) array_pop($stack);
     }
-    // match stack with first leave after it, start from the last one
-    rsort($stack); dd($stack, 'stack');
-    foreach ($stack as $ks => $k) {
-        foreach ($first as $p => $kl) if ($kl > $k) {
-            unset($first[$p]); $R[0][$k] .= '->'.$kl;
-            unset($stack[$ks]); break;
-        }
-    }
-    dd($R[0], 'R[0]');
-    return count($stack) + count($last);
+    // return
+    dd($stack, 'stack'); dd($r, 'r');
+    return count($stack) + $r;
 }
 
-function strait($I, &$R) {
-    $pre_k = -1; $pre_a = '';
-    foreach ($R[$I] as $k => $a) {
-        if ($a == $pre_a && $a == 'E') {
-            for ($i = $pre_k; $i < $k; $i ++) {
-                if (!isset($R[0][$i]) || $R[0][$i] != 'L') continue;
-                unset($R[0][$i]); $R[$I][$i] = 'L'; break;
-            }
-            if ($i == $k) return false;
+function strait(&$A, &$R) {
+    $LL = []; $EE = []; // record LL and EE intervals
+    $FL = []; $LE = []; // record first Ls and last Es
+    $n = count($A);
+    foreach ($R as $id => $v) {
+        if ($id == 0) continue;
+        $v[$n] = 'E'; $pre_a = 'L'; $pre_k = -1;
+        foreach ($v as $k => $a) {
+            if ($a != $pre_a) { $pre_a = $a; $pre_k = $k; continue; }
+            if ($pre_k == -1) $FL[] = $k;
+            elseif ($k == $n) $LE[] = $pre_k;
+            elseif ($a == 'L') $LL[$k] = $pre_k;
+            elseif ($a == 'E') $EE[$k] = $pre_k;
+            $pre_a = $a; $pre_k = $k;
         }
-        if ($a == $pre_a && $a == 'L') {
-            for ($i = $k; $i > $pre_k; $i --) {
-                if (!isset($R[0][$i]) || $R[0][$i] != 'E') continue;
-                unset($R[0][$i]); $R[$I][$i] = 'E *'; break;
-            }
-            if ($i == $pre_k) return false;
-        }
-        $pre_a = $a; $pre_k = $k;
     }
-    ksort($R[$I]); dd($R[$I], 'strait '.$I);
+    dd($LL, 'LL'); dd($EE, 'EE');
+    // from first event, assign 'L 0' to earliest finished EE interval
+    ksort($EE);
+    foreach ($R[0] as $k0 => $a) if ($a == 'L') {
+        foreach ($EE as $k => $pre_k) if ($pre_k < $k0 && $k > $k0) {
+            unset($R[0][$k0]); unset($EE[$k]); $A[$k0][1] = $A[$k][1].'*'; break;
+        }
+    }
+    // from first event, assign 'L 0' left to earlest left Es
+    sort($LE);
+    foreach ($R[0] as $k0 => $a) if ($a == 'L') {
+        $k = $n;
+        foreach ($LE as $key => $pre_k) if ($pre_k < $k0 && $k > $k0) {
+            unset($R[0][$k0]); unset($LE[$key]); $A[$k0][1] = $A[$pre_k][1].'-'; break;
+        }
+    }
+    // from last event, assign 'E 0' to latest started LL interval
+    krsort($R[0]); arsort($LL);
+    foreach ($R[0] as $k0 => $a) if ($a == 'E') {
+        foreach ($LL as $k => $pre_k) if ($pre_k < $k0 && $k > $k0) {
+            unset($R[0][$k0]); unset($LL[$k]); $A[$k0][1] = $A[$k][1].'*'; break;
+        }
+    }
+    // from last event, assign 'E 0' left to latest left Ls
+    rsort($FL);
+    foreach ($R[0] as $k0 => $a) if ($a == 'E') {
+        $pre_k = -1;
+        foreach ($FL as $key => $k) if ($pre_k < $k0 && $k > $k0) {
+            unset($R[0][$k0]); unset($FL[$key]); $A[$k0][1] = $A[$k][1].'-'; break;
+        }
+    }
+    // return
+    return empty($LL) && empty($EE) ? count($LE) : false;
 }
 
 function fake() {
@@ -105,12 +114,12 @@ for ($c = 1; $c <= $T; $c ++) {
     for ($i = 0; $i < $N; $i ++) {
         $A[$i] = explode(' ', read($hr));
     }
-    //if ($c != 5) continue;
-    write(solve($N, $A)."\n", $hw);
+    //if ($c != 13) continue;
+    write(solve($A)."\n", $hw);
 }
 /**
  * Created by PhpStorm.
  * User: sumi
- * Date: 19-1-27
- * Time: 下午1:51
+ * Date: 19-1-31
+ * Time: 0:45
  */

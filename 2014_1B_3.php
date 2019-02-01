@@ -47,9 +47,9 @@ class TravelingSalesman {
         echo 'try_next: '.$n.'<br/>';
         $stack = $this->stack; $dead = $this->dead;
         $p = array_pop($stack);
-        if(isset($this->G[$p][$n])) return true;	//直接子节点 不kill掉任何节点
+        if(isset($this->G[$p][$n])) return true;    //直接子节点 不kill掉任何节点
         while($stack && !isset($this->G[$p][$n])) { $dead[$p] = 1; $p = array_pop($stack); }
-        if(!isset($this->G[$p][$n])) { unset($this->reachable[$n]); return false; }	//节点不可达 因为只能被已经kill掉的节点访问
+        if(!isset($this->G[$p][$n])) { unset($this->reachable[$n]); return false; }    //节点不可达 因为只能被已经kill掉的节点访问
         array_push($stack, $p);
         echo 'try_stack: '; print_r($stack); echo '<br/>';
         echo 'try_dead: '; print_r($dead); echo '<br/>';

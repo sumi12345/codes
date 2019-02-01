@@ -92,7 +92,7 @@ class Input {
                 $N = intval(trim(fgets($handle)));
                 $S = explode(' ', trim(fgets($handle)));
                 $r = $T->solve($N, $S);
-                echo ($r)."\n";
+                echo ($r).'<br/>';
                 file_put_contents($this->out_file, ($r).($c == $cases ? "" : "\r\n"), FILE_APPEND);
             }
             fclose($handle);
@@ -108,7 +108,7 @@ echo '<br/>execution time: '.(time() - $t).'<br/>';
 echo '<br/>memory peak usage: '.(memory_get_peak_usage() / 1024 / 1024);
 
 /**
- *	某个坑: 当所有字符串都是单字符串时 start为空数组 并不能判断为存在环
+ *  某个坑: 当所有字符串都是单字符串时 start为空数组 并不能判断为存在环
  *  large: $r %= 1000000007; 溢出
  */
 /**

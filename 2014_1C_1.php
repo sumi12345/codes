@@ -39,7 +39,7 @@ class Input {
                 file_put_contents($this->out_file, 'Case #'.$c.': ', FILE_APPEND);
                 $conf = trim(fgets($handle));
                 $r = $E->solve($conf);
-                echo ($r === false ? 'impossible' : $r)."\n";
+                echo ($r === false ? 'impossible' : $r).'<br/>';
                 file_put_contents($this->out_file, ($r === false ? 'impossible' : $r).($c == $cases ? "" : "\r\n"), FILE_APPEND);
             }
             fclose($handle);
@@ -55,7 +55,7 @@ echo '<br/>execution time: '.(time() - $t).'<br/>';
 echo '<br/>memory peak usage: '.(memory_get_peak_usage() / 1024 / 1024);
 
 /**
- *	large case: 需要64位的计算
+ *  large case: 需要64位的计算
  */
 
 /**

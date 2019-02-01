@@ -36,7 +36,7 @@ class Input {
                 $conf = explode(' ', trim(fgets($handle)));
                 $N = $conf[0]; $X = $conf[1]; $F = explode(' ', trim(fgets($handle)));
                 $r = $D->solve($N, $X, $F);
-                echo ($r)."\n";
+                echo ($r).'<br/>';
                 file_put_contents($this->out_file, ($r).($c == $cases ? "" : "\r\n"), FILE_APPEND);
             }
             fclose($handle);

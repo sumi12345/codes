@@ -6,8 +6,8 @@ class UpAndDown {
 
     public function solve($N, $S) {
         $cnt = 0;
-        $pos = array_flip($S); 	//当前某个数字的位置
-        $seq = $S; sort($seq);	//排序
+        $pos = array_flip($S);     //当前某个数字的位置
+        $seq = $S; sort($seq);    //排序
         $L = []; $R = [];
         foreach($seq as $k) {   // k 从小到大
             $v = $pos[$k];      // k 的位置
@@ -19,7 +19,7 @@ class UpAndDown {
             if($ml <= $mr) { //左移 将目标位置(含)到自己之间的数字右移一位
                 $L[$k] = 1; $cnt += $ml;
                 for($i = $v - 1; $i >= $tl; $i --) { $pos[$S[$i]] ++; $S[$i + 1] = $S[$i]; }
-            } else { 		//右移 将目标位置(含)到自己之间的数字左移一位
+            } else {         //右移 将目标位置(含)到自己之间的数字左移一位
                 $R[$k] = 1; $cnt += $mr;
                 for($i = $v + 1; $i <= $tr; $i ++) { $pos[$S[$i]] --; $S[$i - 1] = $S[$i]; }
             }

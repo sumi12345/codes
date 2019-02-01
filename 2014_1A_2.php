@@ -75,7 +75,7 @@ echo '<br/>execution time: '.(time() - $t).'<br/>';
 echo '<br/>memory peak usage: '.(memory_get_peak_usage() / 1024 / 1024);
 
 /**
- *	这里满二叉树的定义: A full binary tree is a rooted tree where every node has either exactly 2 children or 0 children.
+ *  这里满二叉树的定义: A full binary tree is a rooted tree where every node has either exactly 2 children or 0 children.
  *  给出一个无向图 这个无向图本身是树 计算以每一个节点为根的树的最终结点数量
  */
 /**

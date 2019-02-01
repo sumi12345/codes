@@ -26,7 +26,7 @@ class Repeater {
 
     /**
      * 计算去重序列和序列中每个字母的出现次数
-     * str为去重之后的序列 num[i]为去重之后第i个字母出现次数
+     * str为去重之后的序列, num[i]为去重之后第i个字母出现次数
      */
     private function seq_num($s) {
         $len = strlen($s); $str = ''; $num = array(); $pre = ''; $cnt = -1;

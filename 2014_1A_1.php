@@ -97,7 +97,7 @@ echo '<br/>execution time: '.(time() - $t).'<br/>';
 echo '<br/>memory peak usage: '.(memory_get_peak_usage() / 1024 / 1024);
 
 /**
- *	基本思想: 拿第一个device和每一个outlet匹配 生成一个开关序列
+ *  基本思想: 拿第一个device和每一个outlet匹配 生成一个开关序列
  *  再检查这个开关序列是否符合要求
  */
 /**

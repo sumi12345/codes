@@ -59,16 +59,6 @@ function strait(&$A, &$R) {
             unset($R[0][$k0]); unset($LE[$key]); $A[$k0][1] = $A[$pre_k][1].'-'; break;
         }
     }
-    // from first event, break an EL interval, creating an LL interval
-    krsort($EL);
-    foreach ($R[0] as $k0 => $a) if ($a == 'L') {
-        foreach ($EL as $k => $pre_k) if ($pre_k < $k0 && $k > $k0) {
-            for ($i = $k0; $i < $k; $i ++) if ($A[$i] == ['E', 0]) break;
-            if ($i == $k) continue; // without E 0 in new LL interval
-            unset($R[0][$k0]); unset($EL[$k]); $LL[$k] = $k0;
-            $A[$k0][1] = $A[$k][1].'c'; break;
-        }
-    }
     // from last event, assign 'E 0' to latest started LL interval
     krsort($R[0]); arsort($LL);
     foreach ($R[0] as $k0 => $a) if ($a == 'E') {
@@ -82,6 +72,16 @@ function strait(&$A, &$R) {
         $pre_k = -1;
         foreach ($FL as $key => $k) if ($pre_k < $k0 && $k > $k0) {
             unset($R[0][$k0]); unset($FL[$key]); $A[$k0][1] = $A[$k][1].'-'; break;
+        }
+    }
+    // from last event, break an EL interval, creating E X, L 0, E 0, L X
+    asort($EL);  // pick first started one
+    foreach ($R[0] as $k0 => $a) if ($a == 'E') {
+        foreach ($EL as $k => $pre_k) if ($pre_k < $k0 && $k > $k0) {
+            for ($i = $pre_k; $i < $k0; $i ++) if ($A[$i] == ['L', 0]) break;
+            if ($i == $k0) continue; // without L 0 in new EE interval
+            unset($R[0][$k0]); unset($EL[$k]); unset($R[0][$i]);
+            $A[$k0][1] = $A[$k][1].'c'; $A[$i][1] = $A[$k][1].'c'; break;
         }
     }
     // return

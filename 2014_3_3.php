@@ -26,7 +26,6 @@ function solve($A) {
 
 function strait(&$A, &$R) {
     $LL = []; $EE = []; $EL = []; // record LL, EE and EL intervals
-    $FL = []; $LE = []; // record first Ls and last Es
     $n = count($A);
     foreach ($R as $id => $v) {
         if ($id == 0) continue;
@@ -36,46 +35,28 @@ function strait(&$A, &$R) {
                 if ($a == 'L') $EL[$k] = $pre_k;
                 $pre_a = $a; $pre_k = $k; continue;
             }
-            if ($pre_k == -1) $FL[] = $k;
-            elseif ($k == $n) $LE[] = $pre_k;
             elseif ($a == 'L') $LL[$k] = $pre_k;
-            elseif ($a == 'E') $EE[$k] = $pre_k;
+            elseif ($a == 'E') $EE[$pre_k] = $k;
             $pre_a = $a; $pre_k = $k;
         }
     }
     dd($LL, 'LL'); dd($EE, 'EE');
     // from first event, assign 'L 0' to earliest finished EE interval
-    ksort($EE);
+    asort($EE);  // pre_k => k, pre_k is unique
     foreach ($R[0] as $k0 => $a) if ($a == 'L') {
-        foreach ($EE as $k => $pre_k) if ($pre_k < $k0 && $k > $k0) {
-            unset($R[0][$k0]); unset($EE[$k]); $A[$k0][1] = $A[$k][1].'*'; break;
-        }
-    }
-    // from first event, assign 'L 0' left to earlest left Es
-    sort($LE);
-    foreach ($R[0] as $k0 => $a) if ($a == 'L') {
-        $k = $n;
-        foreach ($LE as $key => $pre_k) if ($pre_k < $k0 && $k > $k0) {
-            unset($R[0][$k0]); unset($LE[$key]); $A[$k0][1] = $A[$pre_k][1].'-'; break;
+        foreach ($EE as $pre_k => $k) if ($pre_k < $k0 && $k > $k0) {
+            unset($R[0][$k0]); unset($EE[$pre_k]); $A[$k0][1] = $A[$pre_k][1].'*'; break;
         }
     }
     // from last event, assign 'E 0' to latest started LL interval
-    krsort($R[0]); arsort($LL);
+    krsort($R[0]); arsort($LL); // k => pre_k, k is unique
     foreach ($R[0] as $k0 => $a) if ($a == 'E') {
         foreach ($LL as $k => $pre_k) if ($pre_k < $k0 && $k > $k0) {
             unset($R[0][$k0]); unset($LL[$k]); $A[$k0][1] = $A[$k][1].'*'; break;
         }
     }
-    // from last event, assign 'E 0' left to latest left Ls
-    rsort($FL);
-    foreach ($R[0] as $k0 => $a) if ($a == 'E') {
-        $pre_k = -1;
-        foreach ($FL as $key => $k) if ($pre_k < $k0 && $k > $k0) {
-            unset($R[0][$k0]); unset($FL[$key]); $A[$k0][1] = $A[$k][1].'-'; break;
-        }
-    }
-    // from last event, break an EL interval, creating E X, L 0, E 0, L X
-    asort($EL);  // pick first started one
+    // from last event, assign 'E 0', break an EX LX, creating EX L0 E0 LX.
+    asort($EL);  // k => pre_k, pick first started one
     foreach ($R[0] as $k0 => $a) if ($a == 'E') {
         foreach ($EL as $k => $pre_k) if ($pre_k < $k0 && $k > $k0) {
             for ($i = $pre_k; $i < $k0; $i ++) if ($A[$i] == ['L', 0]) break;
@@ -85,7 +66,10 @@ function strait(&$A, &$R) {
         }
     }
     // return
-    return empty($LL) && empty($EE) ? count($LE) : false;
+    $ll = true; $ee = true; $last_e = 0;
+    foreach ($LL as $k => $pre_k) if ($pre_k != -1) $ll = false;
+    foreach ($EE as $pre_k => $k) if ($k != $n) $ee = false; else $last_e ++;
+    return $ll && $ee ? $last_e : false;
 }
 
 function fake() {

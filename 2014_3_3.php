@@ -25,14 +25,17 @@ function solve($A) {
 }
 
 function strait(&$A, &$R) {
-    $LL = []; $EE = []; // record LL and EE intervals
+    $LL = []; $EE = []; $EL = []; // record LL, EE and EL intervals
     $FL = []; $LE = []; // record first Ls and last Es
     $n = count($A);
     foreach ($R as $id => $v) {
         if ($id == 0) continue;
         $v[$n] = 'E'; $pre_a = 'L'; $pre_k = -1;
         foreach ($v as $k => $a) {
-            if ($a != $pre_a) { $pre_a = $a; $pre_k = $k; continue; }
+            if ($a != $pre_a) {
+                if ($a == 'L') $EL[$k] = $pre_k;
+                $pre_a = $a; $pre_k = $k; continue;
+            }
             if ($pre_k == -1) $FL[] = $k;
             elseif ($k == $n) $LE[] = $pre_k;
             elseif ($a == 'L') $LL[$k] = $pre_k;
@@ -54,6 +57,16 @@ function strait(&$A, &$R) {
         $k = $n;
         foreach ($LE as $key => $pre_k) if ($pre_k < $k0 && $k > $k0) {
             unset($R[0][$k0]); unset($LE[$key]); $A[$k0][1] = $A[$pre_k][1].'-'; break;
+        }
+    }
+    // from first event, break an EL interval, creating an LL interval
+    krsort($EL);
+    foreach ($R[0] as $k0 => $a) if ($a == 'L') {
+        foreach ($EL as $k => $pre_k) if ($pre_k < $k0 && $k > $k0) {
+            for ($i = $k0; $i < $k; $i ++) if ($A[$i] == ['E', 0]) break;
+            if ($i == $k) continue; // without E 0 in new LL interval
+            unset($R[0][$k0]); unset($EL[$k]); $LL[$k] = $k0;
+            $A[$k0][1] = $A[$k][1].'c'; break;
         }
     }
     // from last event, assign 'E 0' to latest started LL interval
@@ -97,7 +110,7 @@ function write($str, $hw) {
 }
 
 if (ENV == 'test') {
-    $hr = fopen('../下载/C-small-practice.in', 'r');
+    $hr = fopen('../下载/C-large-practice.in', 'r');
     $hw = fopen('../下载/OUT_3.txt', 'w');
     $hw = fopen('../下载/OUT_3.txt', 'a');
 } else {
@@ -114,7 +127,7 @@ for ($c = 1; $c <= $T; $c ++) {
     for ($i = 0; $i < $N; $i ++) {
         $A[$i] = explode(' ', read($hr));
     }
-    //if ($c != 13) continue;
+    //if ($c != 24) continue;
     write(solve($A)."\n", $hw);
 }
 /**

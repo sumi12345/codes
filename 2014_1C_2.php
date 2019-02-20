@@ -7,64 +7,80 @@ class TrainCars {
     public function solve($N, $S) {
         $this->N = $N;
         $this->S = $S;
-
+        $this->M = 1000000007;
+        //检查是否可行
         $r = $this->process_cars();
         if($r === false) return 0;
-
+        //计算排列数
         return $this->count_order();
     }
 
+    //检查是否可行
     private function process_cars() {
-        $this->start = array(); $this->end = array(); $this->mid = array(); $this->all = array();
+        $this->start = array();
+        $this->end = array();
+        $this->mid = array();
+        $this->all = array();
         foreach($this->S as $k => $car) {
             //字符串去重
             $len = strlen($car); $unq_str = $car[0];
-            for($i = 1; $i < $len; $i ++) if($car[$i] != $car[$i - 1]) $unq_str .= $car[$i];
-            echo 'uni_str: '.$unq_str.'<br/>';
-            //echo 'start: '; print_r($this->start); echo '<br/>';
-            //echo 'end: '; print_r($this->end); echo '<br/>';
-            //echo 'mid: '; print_r($this->mid); echo '<br/>';
+            for($i = 1; $i < $len; $i ++) {
+                if($car[$i] != $car[$i - 1]) $unq_str .= $car[$i];
+            }
+
             $car = $unq_str; $len = strlen($unq_str);
             //如果整个字符串是同一个字母 放入all的计数
-            if($len == 1) { $this->all[$car[0]] = isset($this->all[$car[0]]) ? $this->all[$car[0]] + 1 : 1; continue; }
-            //起始和末尾
+            if($len == 1) {
+                $this->all[$car[0]] = isset($this->all[$car[0]]) ? $this->all[$car[0]] + 1 : 1;
+                continue;
+            }
+            //如果不是单字母字符串, 记录起始和末尾
             $s = $car[0]; $e = $car[$len - 1];
+            //不可行: 出现在中间也出现在首尾 / 多次出现在开始 / 多次出现在结束
             if(isset($this->mid[$s]) || isset($this->start[$s])) return false;
             if(isset($this->mid[$e]) || isset($this->end[$e])) return false;
             $this->start[$s] = $k; $this->end[$e] = $k;
-            //中间
+            //记录中间字母
             for($i = 1; $i < $len - 1; $i ++) {
                 $m = $car[$i];
+                //不可行: 多次出现在中间 / 出现在中间也出现在首尾
                 if(isset($this->mid[$m]) || isset($this->start[$m]) || isset($this->end[$m])) return false;
                 $this->mid[$m] = $k;
             }
         }
     }
 
+    //生成非连续字符串组, 返回排列数
     private function count_order() {
         $start = array_keys($this->start);
         $end = array_keys($this->end);
         $S = array_diff($start, $end);
-        echo 'start: '; print_r($S); echo '<br/>';
-        //形成一个环
+        //不可行: 形成一个环, 所有出现在开始的字母都出现在末尾
         if(!$S && $start) return 0;
-        $len = count($S); $d = array();
-        //处理整个字符串相同的情况
-        $this->arr = [];
+        //非连续字符串的个数
+        $len = count($S);
+        //处理整个字符串相同的情况, 记录每个单字母字符串的排列数
+        $d = array();
         foreach($this->all as $k => $v) {
             if(!isset($this->start[$k]) && !isset($this->end[$k])) $len ++;
             $d[$k] = $this->order($v);
         }
-        echo 'len: '.$len.'<br/>';
+        //最终的排列数
         $r = $this->order($len);
-        foreach($d as $k => $v) { $r *= $v; $r %= 1000000007; }
-        return $r;
+        foreach($d as $k => $v) {
+            $r *= $v;
+            $r %= $this->M;
+        }
+        return $r % $this->M;
     }
 
+    //计算阶乘, 保存到 $this->arr 中
     private function order($n) {
+        if(!isset($this->arr)) $this->arr = array();
         if(!isset($this->arr[$n])) {
-            $this->arr[$n] = $n == 0 ? 1 : $n * $this->order($n - 1);
-            $this->arr[$n] %= 1000000007;
+            $r = $n == 0 ? 1 : $n * $this->order($n - 1);
+            $r %= $this->M;
+            $this->arr[$n] = $r;
         }
         return $this->arr[$n];
     }
@@ -101,7 +117,7 @@ class Input {
 }
 
 $t = time();
-$i = new Input('../下载/B-small-practice.in','../下载/OUT_2.txt');
+$i = new Input('../下载/B-large-practice.in','../下载/OUT_2.txt');
 $i->process();
 
 echo '<br/>execution time: '.(time() - $t).'<br/>';

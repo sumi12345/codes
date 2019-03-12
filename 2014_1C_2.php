@@ -1,135 +1,112 @@
 <?php
-ini_set("max_execution_time","3");
-ini_set("memory_limit","3M");
+define('ENV', 'test');
 
-class TrainCars {
-
-    public function solve($N, $S) {
-        $this->N = $N;
-        $this->S = $S;
-        $this->M = 1000000007;
-        //检查是否可行
-        $r = $this->process_cars();
-        if($r === false) return 0;
-        //计算排列数
-        return $this->count_order();
-    }
-
-    //检查是否可行
-    private function process_cars() {
-        $this->start = array();
-        $this->end = array();
-        $this->mid = array();
-        $this->all = array();
-        foreach($this->S as $k => $car) {
-            //字符串去重
-            $len = strlen($car); $unq_str = $car[0];
-            for($i = 1; $i < $len; $i ++) {
-                if($car[$i] != $car[$i - 1]) $unq_str .= $car[$i];
-            }
-
-            $car = $unq_str; $len = strlen($unq_str);
-            //如果整个字符串是同一个字母 放入all的计数
-            if($len == 1) {
-                $this->all[$car[0]] = isset($this->all[$car[0]]) ? $this->all[$car[0]] + 1 : 1;
-                continue;
-            }
-            //如果不是单字母字符串, 记录起始和末尾
-            $s = $car[0]; $e = $car[$len - 1];
-            //不可行: 出现在中间也出现在首尾 / 多次出现在开始 / 多次出现在结束
-            if(isset($this->mid[$s]) || isset($this->start[$s])) return false;
-            if(isset($this->mid[$e]) || isset($this->end[$e])) return false;
-            $this->start[$s] = $k; $this->end[$e] = $k;
-            //记录中间字母
-            for($i = 1; $i < $len - 1; $i ++) {
-                $m = $car[$i];
-                //不可行: 多次出现在中间 / 出现在中间也出现在首尾
-                if(isset($this->mid[$m]) || isset($this->start[$m]) || isset($this->end[$m])) return false;
-                $this->mid[$m] = $k;
+function solve($N, $S) {
+    // index of letters at first, last, middle / number of single letter str
+    $first = []; $last = []; $middle = []; $single = [];
+    foreach ($S as $k => $s) {
+        // remove repeated letters
+        $arr = []; $len = strlen($s); $pre = '.';
+        for ($i = 0; $i < $len; $i ++) {
+            if ($s[$i] == $pre) continue;
+            // check multiple times at the same string *
+            if (isset($arr[$s[$i]])) return 0;
+            $arr[$s[$i]] = 1; $pre = $s[$i];
+        }
+        $arr = array_keys($arr);
+        dd(implode('', $arr), $k);
+        // record
+        $len = count($arr);
+        if (count($arr) == 1) {
+            if (!isset($single[$arr[0]])) $single[$arr[0]] = 0;
+            $single[$arr[0]] ++;
+        } else {
+            if (isset($first[$arr[0]])) return 0;
+            $first[$arr[0]] = $k;
+            if (isset($last[$arr[$len - 1]])) return 0;
+            $last[$arr[$len - 1]] = $k;
+            for ($i = 1; $i < $len - 1; $i ++) {
+                if (isset($middle[$arr[$i]])) return 0;
+                $middle[$arr[$i]] = $k;
             }
         }
     }
-
-    //生成非连续字符串组, 返回排列数
-    private function count_order() {
-        $start = array_keys($this->start);
-        $end = array_keys($this->end);
-        $S = array_diff($start, $end);
-        //不可行: 形成一个环, 所有出现在开始的字母都出现在末尾
-        if(!$S && $start) return 0;
-        //非连续字符串的个数
-        $len = count($S);
-        //处理整个字符串相同的情况, 记录每个单字母字符串的排列数
-        $d = array();
-        foreach($this->all as $k => $v) {
-            if(!isset($this->start[$k]) && !isset($this->end[$k])) $len ++;
-            $d[$k] = $this->order($v);
-        }
-        //最终的排列数
-        $r = $this->order($len);
-        foreach($d as $k => $v) {
-            $r *= $v;
-            $r %= $this->M;
-        }
-        return $r % $this->M;
+    // check conflict of middle
+    foreach ($middle as $l => $idx) {
+        if (isset($first[$l]) || isset($last[$l]) || isset($single[$l])) return 0;
     }
-
-    //计算阶乘, 保存到 $this->arr 中
-    private function order($n) {
-        if(!isset($this->arr)) $this->arr = array();
-        if(!isset($this->arr[$n])) {
-            $r = $n == 0 ? 1 : $n * $this->order($n - 1);
-            $r %= $this->M;
-            $this->arr[$n] = $r;
-        }
-        return $this->arr[$n];
+    // count jointed string
+    $joint = array_intersect(array_keys($last), array_keys($first));
+    $num = count($first) - count($joint);
+    // check circle
+    if ($num == 0 && !empty($first)) return 0;
+    // calculate permutation
+    $r = 1;
+    foreach ($single as $l => $n) {
+        if (!isset($first[$l]) && !isset($last[$l])) $num ++;
+        $r *= Util::factorial($n);
+        $r %= 1000000007;
     }
-
+    $r *= Util::factorial($num);
+    $r %= 1000000007;
+    return $r;
 }
 
-class Input {
-    private $in_file;
-    private $out_file;
-
-    function __construct($i, $o) {
-        $this->in_file = $i;
-        $this->out_file = $o;
-    }
-
-    function process() {
-        $handle = fopen($this->in_file, "r");
-        if ($handle) {
-            $cases = intval(fgets($handle, 32));
-            file_put_contents($this->out_file, '');
-            $T = new TrainCars();
-            for($c = 1; $c <= $cases; $c ++) {
-                echo 'Case #'.$c.': ';
-                file_put_contents($this->out_file, 'Case #'.$c.': ', FILE_APPEND);
-                $N = intval(trim(fgets($handle)));
-                $S = explode(' ', trim(fgets($handle)));
-                $r = $T->solve($N, $S);
-                echo ($r).'<br/>';
-                file_put_contents($this->out_file, ($r).($c == $cases ? "" : "\r\n"), FILE_APPEND);
-            }
-            fclose($handle);
-        }
+class Util {
+    static $F = [0 => 1];
+    static function factorial($N) {
+        if (isset(self::$F[$N])) return self::$F[$N];
+        $r = $N * self::factorial($N - 1);
+        $r %= 1000000007;
+        self::$F[$N] = $r;
+        return $r;
     }
 }
 
-$t = time();
-$i = new Input('../下载/B-large-practice.in','../下载/OUT_2.txt');
-$i->process();
+function fake() {
+    $str = "\n";
+    file_put_contents('../下载/IN.txt', $str, FILE_APPEND);
+}
 
-echo '<br/>execution time: '.(time() - $t).'<br/>';
-echo '<br/>memory peak usage: '.(memory_get_peak_usage() / 1024 / 1024);
+function dd($item, $name = '') {
+    if (ENV != 'test') return;
+    if ($name != '') echo $name.': ';
+    if (is_array($item)) print_r($item);
+    else echo $item."\n";
+}
 
-/**
- *  某个坑: 当所有字符串都是单字符串时 start为空数组 并不能判断为存在环
- *  large: $r %= 1000000007; 溢出
- */
+function read($hr) {
+    return trim(fgets($hr));
+}
+
+function write($str, $hw) {
+    if (ENV == 'test') echo $str;
+    fwrite($hw, $str);
+}
+
+if (ENV == 'test') {
+    //$hr = fopen('../下载/IN.txt', 'r');
+    $hr = fopen('../下载/B-large-practice (1).in', 'r');
+    $hw = fopen('../下载/OUT_3.txt', 'w');
+    $hw = fopen('../下载/OUT_3.txt', 'a');
+} else {
+    $hr = STDIN;
+    $hw = STDOUT;
+}
+
+//---- start process ----
+//file_put_contents('../下载/IN.txt', "99\n"); for ($i = 0; $i < 99; $i ++) fake();
+$T = read($hr);
+for ($c = 1; $c <= $T; $c ++) {
+    write('Case #'.$c.': ', $hw);
+    $N = read($hr);
+    $S = explode(' ', read($hr));
+    //if ($N > 4) continue;
+    write(solve($N, $S)."\n", $hw);
+}
 /**
  * Created by PhpStorm.
  * User: sumi
- * Date: 19-2-1
- * Time: 下午9:33
+ * Date: 19-3-12
+ * Time: 下午1:15
  */

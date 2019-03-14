@@ -1,7 +1,7 @@
 <?php
 define('ENV', 'test');
 function solve($N, $M, $P, $shuttle, $route) {
-    // build graph
+    // build graph, G[from][to] = shuttle_id
     $G = [];
     foreach ($shuttle as $k => $s) {
         $u = $s[0]; $v = $s[1];
@@ -19,16 +19,19 @@ function solve($N, $M, $P, $shuttle, $route) {
     return 'Looks Good To Me';
 }
 
+// is it possible to be shortest if Ith part of route is preserved
 function check_prefix($I, $shuttle, $route, $G) {
-    // initiate distance
-    $cost = 0; $city = 0; $prefix = [];
+    // prefix total cost, end city, prefix shuttle id, prefix city
+    $cost = 0; $city = 0; $prefix = []; $prefix_city = [];
     for ($i = 0; $i <= $I; $i ++) {
         $k = $route[$i];
         $city = $shuttle[$k][1];
         $cost += $shuttle[$k][2];
         $prefix[$k] = 1;
+        $prefix_city[$city] = 1;
     }
     // Dijkstra
+    // * don't include prefix in D, bad robot is allowed to visit prefix city earlier
     $D = [1 => 0, $city => $cost - 0.5];
     $visited = [];
     for ($K = 0; $K <= 2000; $K ++) { // until all cities visited
@@ -39,6 +42,9 @@ function check_prefix($I, $shuttle, $route, $G) {
         $visited[$min_city] = $min_dis;
         $is_good = $min_dis - floor($min_dis) > 0.1;
         if (isset($G[$min_city])) foreach ($G[$min_city] as $v => $k) {
+            if (isset($visited[$v])) continue;
+            // * if a shortest route has a circle, then it could not be shortest
+            if ($is_good && isset($prefix_city[$v])) continue;
             $d = $is_good || isset($prefix[$k]) ? $shuttle[$k][2] : $shuttle[$k][3];
             if (!isset($D[$v]) || $D[$v] > $D[$min_city] + $d) {
                 $D[$v] = $D[$min_city] + $d;

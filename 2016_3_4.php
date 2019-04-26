@@ -1,8 +1,11 @@
 <?php
 class GPP {
 
-    public function solve($N, $L, $G, $B) { //echo 'solve(L='.$L.', B='.$B.')'."\n";
-        for ($i = 0; $i < $N; $i ++) if ($G[$i] == $B) return 'IMPOSSIBLE';
+    public function solve($N, $L, $G, $B) { echo 'solve(L='.$L.', B='.$B.')'."\n";
+        foreach ($G as $g) if ($g === $B) return 'IMPOSSIBLE';
+
+        // * length = 1, the second program will be empty using following way
+        if ($L == 1) return (1 - $B[0]).'? '.(1 - $B[0]);
 
         $P1 = '';
         for ($i = 0; $i < $L; $i ++) $P1 .= (1 - $B[$i]).'?';
@@ -16,7 +19,7 @@ class GPP {
 
 $G = new GPP();
 echo $G->solve(2, 2, ['10', '00'], '11');
-exit;
+//exit;
 
 class Input {
     private $in_file;
@@ -52,7 +55,7 @@ class Input {
 $t = time();
 
 //$i = new Input('../下载/D-small-practice.in','../下载/OUT_3.txt');
-//$i = new Input('../下载/D-large-practice.in','../下载/OUT_3.txt');
+$i = new Input('../下载/D-large-practice.in','../下载/OUT_3.txt');
 $i->process();
 
 echo "\n".'execution time: '.(time() - $t)."\n";
@@ -76,5 +79,4 @@ echo "\n".'memory peak usage: '.(memory_get_peak_usage() / 1024 / 1024);
  *        大数据集, 把B的前L-1个数字依次替换, 0->10, 1->01.
  *                这样要打印 L-1 长度的结果, 每位在每个 01 和 10 之间选一个
  *                要打印B, 就会因为程序2的序列无法生成B而失败
- * 不通过, 原因不明
  */

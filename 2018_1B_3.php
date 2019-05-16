@@ -1,4 +1,3 @@
-12345678901234567890123456789012345678901234567890123456789012345678901234567890
 <?php
 ini_set("memory_limit", "128M");
 define('ENV', 'test');
@@ -7,68 +6,50 @@ function solve($M, $R, $G) {
     array_unshift($R, 0); unset($R[0]);
     array_unshift($G, 0); unset($G[0]);
     //return solve_small($R, $G);
+    //return solve_middle($R, $G);
     return solve_large($R, $G);
 }
 
-function solve_large($R, $G) {
-    $need = [1];
-    $parent = [[]];
-    $total = 0;
-    for ($i = 0; $i <= 100; $i ++) {  // untill cannot produce more lead
-        $r = createMetal($need, $parent, $total, $R, $G);
-        if ($r === false) break;
+function solve_middle($R, $G) {
+    // total weight of all metal left, determine when to stop
+    $total_g = 0;
+    foreach ($G as $m => $g) $total_g += $g;
+    // expand set until need more than total weight left
+    $need = [1]; $total = $G[1]; $G[1] = 0;
+    for ($K = 0; $K < 10000; $K ++) {
+        $produce = create_middle($need, $R, $G);
+        foreach ($need as $m) $G[$m] -= $produce;
+        $total += $produce; $total_g -= count($need) * $produce;
+        if ($total_g < count($need)) break;
     }
-    dd($i, 'final I'); // dd($need, 'need'); dd($parent, 'parent');
     return $total;
 }
 
-function createMetal(&$need, &$parent, &$total, $R, &$G) {
-    // check this set
-    $min_g = -1; $cnt = [];
-    foreach ($need as $k => $m) {
-        if (!isset($cnt[$m])) $cnt[$m] = 0;
-        $cnt[$m] ++;
-        $g = floor($G[$m] / $cnt[$m]);
-        if ($min_g == -1 || $g < $min_g) $min_g = $g;
+// return new produce
+function create_middle(&$need, $R, $G) {
+    // expand
+    $new_need = [];
+    foreach ($need as $m) {
+        $G[$m] --;
+        if ($G[$m] >= 0) $new_need[] = $m;
+        else { $new_need[] = $R[$m][0]; $new_need[] = $R[$m][1]; }
     }
-    // valid set
-    if ($min_g > 0) {
-        $total += $min_g;
-        foreach ($cnt as $m => $n) $G[$m] -= $n * $min_g;
+    foreach ($need as $m) $G[$m] ++;
+    $need = $new_need;
+    // check if this set can produce new lead
+    $sum = [];
+    foreach ($need as $m) {
+        if (!isset($sum[$m])) $sum[$m] = 0;
+        $sum[$m] ++;
     }
-    //dd($min_g, 'min_g'); dd($cnt, 'cnt'); dd(implode(' ', $G), 'G');
-    // next
-    $new_need = []; $new_parent = []; $cnt = [];
-    foreach ($need as $k => $m) {
-        if (!isset($cnt[$m])) $cnt[$m] = 0; // has consumed
-        if ($G[$m] - $cnt[$m] > 0) {        // ensure left most first
-            $new_need[] = $m; $new_parent[] = $parent[$k]; $cnt[$m] ++;
-        } else {                            // split
-            $lm = $R[$m][0]; $rm = $R[$m][1];  // has circle
-            if (isset($parent[$k][$lm]) || isset($parent[$k][$rm])) return false;
-            $new_need[] = $lm;              // left, add m to its parent
-            $lp = $parent[$k]; $lp[$m] = 1; $new_parent[] = $lp;
-            $new_need[] = $rm;              // right
-            $rp = $parent[$k]; $rp[$m] = 1; $new_parent[] = $rp;
-        }
+    $min_g = 100;
+    foreach ($sum as $m => $n) {
+        $g = $G[$m] / $n;
+        if ($g < $min_g) $min_g = $g;
     }
-    $need = $new_need; $parent = $new_parent;
-}
-
-// $T = [1 => 1]; buildTree($T, 1, $R);
-// not used; need 2^100 as index
-function buildTree(&$T, $I, &$R) {
-    $l = $R[$T[$I]][0]; $r = $R[$T[$I]][1]; $valid = true;
-    for ($K = 0; $K < 100; $K ++) {
-        $i = floor($I / pow(2, $K));
-        if ($T[$i] == $l || $T[$i] == $r) $valid = false;
-        if ($i == 1) break;
-    }
-    if ($valid == false) return;
-    $T[$I * 2] = $l;
-    $T[$I * 2 + 1] = $r;
-    buildTree($T, $I * 2, $R);
-    buildTree($T, $I * 2 + 1, $R);
+    $min_g = intval($min_g);
+    //dd($min_g, 'produce');
+    return $min_g;
 }
 
 function solve_small($R, $G) {
@@ -87,7 +68,7 @@ function create($m, $R, &$G, $level) {
 }
 
 function fake() {
-    $M = 100; $R = []; $G = [];
+    $M = 8; $R = []; $G = [];
     for ($i = 1; $i <= $M; $i ++) {
         $r1 = $i; $r2 = $i;
         while ($r1 == $i || $r2 == $i) {
@@ -95,7 +76,7 @@ function fake() {
             $r2 = rand($r1 + 1, $M);
         }
         $R[] = $r1.' '.$r2;
-        $G[] = rand(1, 100);
+        $G[] = rand(1, 8);
     }
 
     $str = $M."\n".implode("\n", $R)."\n".implode(' ', $G)."\n";
@@ -128,7 +109,7 @@ if (ENV == 'test') {
 }
 
 //---- start process ----
-file_put_contents('../下载/IN.txt', "99\n"); for ($i = 0; $i < 99; $i ++) fake();
+//file_put_contents('../下载/IN.txt', "99\n"); for ($i = 0; $i < 99; $i ++) fake();
 $T = read($hr);
 for ($c = 1; $c <= $T; $c ++) {
     write('Case #'.$c.': ', $hw);
@@ -136,10 +117,10 @@ for ($c = 1; $c <= $T; $c ++) {
     for ($i = 0; $i < $M; $i ++) {
         $R[] = explode(' ', read($hr));
     }
-    $G = explode(' ', read($hr)); //if ($c != 2) continue;
+    $G = explode(' ', read($hr)); if ($c != 59) continue;
     write(solve($M, $R, $G)."\n", $hw);
 }
-dd(memory_get_peak_usage() / 1024 / 1024);
+dd(memory_get_usage() / 1024 / 1024);
 /**
  * Created by PhpStorm.
  * User: sumi
